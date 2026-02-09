@@ -1,11 +1,12 @@
-import { useState } from 'react'
 import './App.css'
-
+import WelcomePage from './pages/WelcomePage.tsx'
+import AppBar from './Components/AppBar.tsx'
 function App() {
-  const [count, setCount] = useState(0)
 
-  return (
+  return(
     <>
+      <AppBar />
+      <WelcomePage />
     </> 
   )
 }
