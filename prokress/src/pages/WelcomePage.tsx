@@ -3,6 +3,7 @@ import { useState } from "react";
 
 function WelcomePage() {
    const [isClicked, setIsClicked] = useState(false);
+   const [isClickedtwo, setIsClickedtwo] = useState(false);
   return(
     <div class="flex flex-col min-h-screen justify-center items-center">
       <h1 class="text-8xl m-4 md:text-nowrap">Get started with Prokress</h1>
