@@ -1,9 +1,4 @@
-type projectType = {
-   projectId: string;
-   title: string,
-   description: string,
-   createdAt: string,
-}
+import type {projectType} from '../helper/types'
 
 type projectCardProps = {
    project: projectType;

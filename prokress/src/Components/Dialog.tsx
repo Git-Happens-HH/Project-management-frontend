@@ -1,4 +1,5 @@
-import type { SubmitEvent } from "react";
+import { useState, type SubmitEvent } from "react";
+import { loginHandler, registerHandler } from "../helper/handler";
 
 
 interface DialogProps {
@@ -7,12 +8,28 @@ interface DialogProps {
   mode: "login" | "register"; // New prop to choose the mode
 }
 
+const [userData, setUserData] = useState(
+  {
+    userName: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    passwordHash: ''
+  }
+) 
+
 const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
   if (!isOpen) return null;
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-    console.log(`${mode} form submitted!`);       /* Placeholder for form handling*/
+    
+    if(mode == 'login') {
+      loginHandler()
+    } else if (mode == 'register') {
+      registerHandler(userData)
+    }
+
     toggleDialog();
   };
 
@@ -30,7 +47,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
         <form onSubmit={handleSubmit} className="relative flex flex-col bg-white">        
           <div className="relative m-2.5 items-center flex justify-center text-white h-24 rounded-md bg-orange-500">
             <h3 className="text-2xl font-semibold">
-              {isLogin ? "Sign In" : "Create Account"}
+              {isLogin ? "Login" : "Create Account"}
             </h3>
           </div>
 
@@ -70,7 +87,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
               type="submit"
               className="w-full rounded-md bg-slate-800 py-2.5 px-4 text-center text-sm font-semibold text-white hover:bg-green-500 transition-all"
             >
-              {isLogin ? "Sign In" : "Register"}
+              {isLogin ? "Login" : "Register"}
             </button>
             
             <p className="flex justify-center mt-6 text-sm text-slate-600">
@@ -79,7 +96,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
                 type="button"
                 className="ml-1 font-bold text-slate-800 hover:underline"
               >
-                {isLogin ? "Sign up" : "Login"}
+                {isLogin ? "Register" : "Login"}
                     {/* Button doesnt do anything yet */}
               </button>
             </p>
