@@ -1,16 +1,21 @@
 @import "tailwindcss";
+@font-face{
+  font-family: "Ubuntu";
+  src: url("../src/assets/fonts/Ubuntu-Regular.ttf")
+}
 
 @theme {
-  --color-orange: #ff7c5b;
+  --color-orange: #F58B04;
   --color-green: #78ac7a;
-  --prokress-green: #3A6351;
+  --prokress-violet: #656087;
   --prokress-beige-100: #F2EDD7;
   --prokress-beige-50: #F9F7ED;
   --prokress-beige-0: #FFFFFA;
-  --prokress-orange: #E48257;
+  --prokress-orange: #F58B04;
   --prokress-black-700: #393232;
   --prokress-black-600: #574F4E;
   --prokress-black-500: #786C6D;
+  --font-ubuntu: Ubuntu, "sans-serif";
 }
 
 :root {
