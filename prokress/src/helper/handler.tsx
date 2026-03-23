@@ -23,10 +23,14 @@ export async function registerHandler(data:userPayload): Promise<Response> {
 }
 
 export async function loginHandler(): Promise<appUser>{
-    const response = await fetch(api_url + '/api/login')
+    //const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/users")
+    const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/appUsers")
     if(!response.ok) {
         throw new Error('Error occured signing in')
     }
     const jsonData: appUser = await response.json()
+    
+    
+
     return jsonData;
 }

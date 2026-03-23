@@ -8,17 +8,17 @@ interface DialogProps {
   mode: "login" | "register"; // New prop to choose the mode
 }
 
-const [userData, setUserData] = useState(
-  {
-    userName: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    passwordHash: ''
-  }
-) 
 
 const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
+  const [userData, setUserData] = useState(
+    {
+      userName: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      passwordHash: ''
+    }
+  ) 
   if (!isOpen) return null;
 
   const handleSubmit = (e: SubmitEvent) => {
@@ -26,8 +26,13 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
     
     if(mode == 'login') {
       loginHandler()
+      .then(users => {
+      const userlist = users._embedded?.AppUsers ?? [];
+      return userlist
+        })
+        .catch(error => {console.log(error)});
     } else if (mode == 'register') {
-      registerHandler(userData)
+     registerHandler(userData)
     }
 
     toggleDialog();
@@ -54,13 +59,38 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
           <div className="flex flex-col gap-4 p-6">                     
             {!isLogin && (  /* Only shown when NOT in login mode */
               <div className="w-full max-w-sm min-w-[200px]"> 
-                <label className="block mb-2 text-sm text-slate-600 font-medium">Full Name</label>
+                <label className="block mb-2 text-sm text-slate-600 font-medium">First Name</label>
                 <input
                   required /* mandatory field */
                   type="text"
                   className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
+                  onChange={(e) => setUserData({...userData, firstName: e.target.value})}
                 />
               </div>
+            )}
+
+            {!isLogin && (  /* Only shown when NOT in login mode */
+              <div className="w-full max-w-sm min-w-[200px]"> 
+                <label className="block mb-2 text-sm text-slate-600 font-medium">Last Name</label>
+                <input
+                  required /* mandatory field */
+                  type="text"
+                  className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
+                  onChange={(e) => setUserData({...userData, lastName: e.target.value})}
+                />
+              </div>  
+            )}
+
+            {!isLogin && (  /* Only shown when NOT in login mode */
+              <div className="w-full max-w-sm min-w-[200px]"> 
+                <label className="block mb-2 text-sm text-slate-600 font-medium">Username</label>
+                <input
+                  required /* mandatory field */
+                  type="text"
+                  className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
+                  onChange={(e) => setUserData({...userData, userName: e.target.value})}
+                />
+              </div>  
             )}
 
             <div className="w-full max-w-sm min-w-[200px]">
@@ -69,6 +99,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
                 required
                 type="email"
                 className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
+                onChange={(e) => setUserData({...userData, email: e.target.value})}
               />
             </div>
 
@@ -78,6 +109,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
                 required
                 type="password"
                 className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
+                onChange={(e) => setUserData({...userData, passwordHash: e.target.value})}
               />
             </div>
           </div>
