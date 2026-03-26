@@ -1,8 +1,12 @@
-import Task from './Task.tsx'
 import {useDroppable} from '@dnd-kit/react';
 import {CollisionPriority} from '@dnd-kit/abstract';
 
-function TaskList ({children, id}) {
+type Props = {
+    children: React.ReactNode
+    id: string
+}
+
+function TaskList ({children, id}: Props) {
    const {isDropTarget, ref} = useDroppable({
     id,
     type: 'column',
