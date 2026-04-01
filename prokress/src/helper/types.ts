@@ -3,6 +3,7 @@ export type projectType = {
    title: string,
    description: string,
    createdAt: string,
+   isShared: boolean,
 }
 
 export type appUser = {

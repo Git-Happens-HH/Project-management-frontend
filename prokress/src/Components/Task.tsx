@@ -1,10 +1,12 @@
 import {useState} from 'react'
 import {useSortable} from '@dnd-kit/react/sortable'
+
 interface TaskProps {
   id: string;
   index: any;
   column: string;
 }
+
 function Task({ id, index, column }: TaskProps) {
    const [isCollapsed, setIsCollapsed] = useState(parseInt(index) >= 4);
    const toggleCollapse = () => {
