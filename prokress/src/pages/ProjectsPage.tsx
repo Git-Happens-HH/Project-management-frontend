@@ -7,16 +7,16 @@ function ProjectsPage() {
    const [myProjects, setMyProjects] = useState<projectType[]>([{projectId:"1", title:"Project one", description:"This is first project you made", createdAt:"24/12/2024", isShared: false}]);
    const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
    const curDate = new Intl.DateTimeFormat('en-GB').format(new Date());
-   const appUserId = "1"
+   const appUserId = 1
    useEffect(() =>{
       const fetchProjects = async () => {
          try {
             const response = await getProjectsForUser(appUserId);
             for (const project of response) {
                if (project.isShared == true) {
-                  setSharedProjects(...sharedProjects, project)
+                  setSharedProjects([...sharedProjects, project])
                } else (
-                  setMyProjects(...myProjects, project)
+                  setMyProjects([...myProjects, project])
                )
             }
          } catch (err) {
@@ -24,7 +24,7 @@ function ProjectsPage() {
          }
       };
       fetchProjects();
-   }, [appUserId])
+   }, [])
 
    return (
       <div className="flex flex-col min-h-screen items-center bg-(--prokress-beige-100)">

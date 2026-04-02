@@ -31,17 +31,16 @@ export async function loginHandler(email: string, password: string): Promise<app
 		throw new Error('Error occured signing in')
 	}
 	const jsonData: appUser[] = await response.json();
-
+	console.log(password)
 	for (const user of jsonData) {
-		if (user.email == email && user.passwordHash === password) {
-			return user.appUserId
+		if (user.email == email) {
+			return user
 		}
 	}
-	return jsonData;
 }
 
 // Fetch all project logged in user is part of.
-export async function getProjectsForUser(appUserId: string): Promise<Response> {
+export async function getProjectsForUser(appUserId: number): Promise<Response> {
 	const response = await fetch(`https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/users/` + appUserId)
 	if (!response.ok) {
 		throw new Error('Error occured signing in')

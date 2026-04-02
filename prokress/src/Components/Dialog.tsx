@@ -25,12 +25,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
     e.preventDefault();
     
     if(mode == 'login') {
-      loginHandler()
-      .then(users => {
-      const userlist = users._embedded?.AppUsers ?? [];
-      return userlist
-        })
-        .catch(error => {console.log(error)});
+      console.log(loginHandler(userData.email, userData.passwordHash))
     } else if (mode == 'register') {
      registerHandler(userData)
     }
