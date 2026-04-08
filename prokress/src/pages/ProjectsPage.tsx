@@ -2,12 +2,17 @@ import ProjectCard from '../Components/ProjectCard.tsx'
 import { useState, useEffect } from 'react'
 import { getProjectsForUser } from '../helper/handler.tsx'
 import type { projectType } from '../helper/types.ts'
+import { useJwt } from "react-jwt"
 
 function ProjectsPage() {
    const [myProjects, setMyProjects] = useState<projectType[]>([{projectId:"1", title:"Project one", description:"This is first project you made", createdAt:"24/12/2024", isShared: false}]);
    const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
    const curDate = new Intl.DateTimeFormat('en-GB').format(new Date());
-   const appUserId = 1
+   //const appUserId = 1
+   const appUserId = localStorage.getItem('token')
+    const { decodedToken, isExpired } = useJwt(appUserId);
+    console.log(decodedToken, isExpired)
+
    useEffect(() =>{
       const fetchProjects = async () => {
          try {
