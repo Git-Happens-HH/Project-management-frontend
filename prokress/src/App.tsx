@@ -13,11 +13,12 @@ function App() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            console.log(token)
             setIsLoggedIn(true)
-            navigate('/projects')
+            if (window.location.pathname === '/') {
+                navigate('/projects');
+            }
         } else {
-            console.log('no token')
+            navigate('/')
         }
     }, [])
     return (

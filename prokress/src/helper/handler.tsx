@@ -1,6 +1,16 @@
-import type { appUser } from './types'
 import { useJwt } from "react-jwt"
+import type { projectType } from "./types";
 
+const url: string = "https://project-management-backend-prokress-backend.2.rahtiapp.fi";
+
+interface TaskList {
+    taskListId: number;
+    projectId: string;
+    title: string;
+    tasks: string[];
+}
+
+type TaskListsState = Record<string, TaskList>;
 interface userPayload {
     userName: string,
     firstName: string,
@@ -27,22 +37,8 @@ export async function registerHandler(data: userPayload): Promise<Response> {
 
 // Funtion for getting all users.
 export async function loginHandler(email: string, password: string): Promise<string> {
-    // --OLD loginHandling
-    //const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/users")
-    //if (!response.ok) {
-    //	throw new Error('Error occured signing in')
-    //}
-    //const jsonData: appUser[] = await response.json();
-    //console.log(password)
-    //for (const user of jsonData) {
-    //	if (user.email == email) {
-    //		return user
-    //        //localStorage.setItem('appUser', JSON.stringify(user))
-    //	}
-    //}
-    // --Login handling with
     try {
-        const response = await fetch("http://localhost:8080/login", {
+        const response = await fetch(url + "/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -53,7 +49,6 @@ export async function loginHandler(email: string, password: string): Promise<str
             throw new Error('Error occured while creating user')
         }
         const tokenData = await response.text();
-        console.log(tokenData)
         return tokenData;
     } catch (error) {
         console.error('Error fetching token: ', error);
@@ -62,11 +57,11 @@ export async function loginHandler(email: string, password: string): Promise<str
 }
 
 // Fetch all project logged in user is part of.
-export async function getProjectsForUser(token: string): Promise<Response> {
-    const response = await fetch(`https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/projects/`, {
+export async function getProjectsForUser(token: string | null): Promise<projectType[]> {
+    const response = await fetch(`${url}/api/projects`, {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer: ${token}`
         },
     })
     if (!response.ok) {
@@ -80,4 +75,83 @@ export async function getProjectsForUser(token: string): Promise<Response> {
 export async function decodeUserWebToken(token: string) {
     const { decodedToken, isExpired } = useJwt(token);
     return { decodedToken, isExpired }
+}
+
+export function transformTaskLists(data: unknown) {
+    const result: TaskListsState = {};
+
+    if (!Array.isArray(data)) return result;
+
+    data.forEach((list: any) => {
+        result[list.title] = {
+            taskListId: list.taskListId,
+            projectId: list.projectId,
+            title: list.title,
+            tasks: list.tasks.map((task: any) => task.title),
+        };
+    });
+    return result;
+}
+// funtion to create new tasklist
+export async function createNewTasklist(token: string, projectId: string, taskListTitle: string): Promise<Response> {
+    try {
+        const response = await fetch(`${url}/api/projects/${projectId}/tasklists`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer: ${token}`
+            },
+            body: JSON.stringify({ title: taskListTitle.trim() })
+        })
+        if (!response.ok) {
+            throw new Error('Error occured fetching projects')
+        }
+        const jsonData = await response.json()
+        return jsonData;
+    } catch (error: unknown) {
+        console.error('Error fetching token: ', error);
+        throw error;
+    }
+}
+
+// function to delete tasklist
+export async function deleteTasklist(token: string, projectId: string, taskListId: number): Promise<Response> {
+    try {
+        const response = await fetch(`${url}/api/projects/${projectId}/tasklists/${taskListId}`, {
+            method: 'DELETE',
+            headers:  {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer: ${token}`
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`)
+        }
+        return response;
+    } catch (error) {
+        console.error('Failed to delete tasklist');
+        throw new Error(`Error something whent wrong while deleting`)
+    }
+}
+
+// funtion to create new Task(requires work is not working)
+export async function createNewTask(token: string, projectId: string, taskListId: number, taskTitle: string, description: string): Promise<Response> {
+    try {
+        const response = await fetch(`${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer: ${token}`
+            },
+            body: JSON.stringify({ title: taskTitle.trim(), description: description.trim()})
+        })
+        if (!response.ok) {
+            throw new Error('Error occured fetching projects')
+        }
+        const jsonData = await response.json()
+        return jsonData;
+    } catch (error: unknown) {
+        console.error('Error fetching token: ', error);
+        throw error;
+    }
 }
