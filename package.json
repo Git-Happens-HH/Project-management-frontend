@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "react-jwt": "^2.0.0"
+  }
+}

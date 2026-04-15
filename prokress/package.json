@@ -13,10 +13,14 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/react": "^0.3.2",
     "@dnd-kit/sortable": "^10.0.0",
+    "@stomp/stompjs": "^7.3.0",
     "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-jwt": "^2.0.0",
     "react-router-dom": "^7.13.1",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
@@ -25,6 +29,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@types/react-router-dom": "^5.3.3",
+    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.3",
     "eslint-plugin-react-hooks": "^7.0.1",
