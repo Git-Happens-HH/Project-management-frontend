@@ -4,8 +4,8 @@ import { useState, useEffect, useRef} from 'react'
 import { useParams } from 'react-router-dom';
 import { createNewTasklist, deleteTasklist, transformTaskLists, createNewTask } from '../helper/handler.tsx';
 import SockJS from 'sockjs-client';
-import { Client } from '@Stomp/stompjs';
-import type { IMessage, StompSubscription } from '@Stomp/stompjs';
+import { Client } from '@stomp/stompjs';
+import type { IMessage, StompSubscription } from '@stomp/stompjs';
 
 interface TaskList {
     taskListId: number;
