@@ -32,6 +32,7 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, toggleDialog, mode }) => {
                 }
 		    } else if (mode == 'register') {
 			registerHandler(userData)
+			console.log(userData)
 		    }
             toggleDialog();
         }
