@@ -20,19 +20,27 @@ interface userPayload {
 }
 
 // Function for sending new Users registerations into backend.
-export async function registerHandler(data: userPayload): Promise<Response> {
-    const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/users", {
+export async function registerHandler(data: userPayload): Promise<string> {
+    const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/register", {
         //const response = await fetch(api_url + '/api/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+            username: data.userName.trim(),
+            firstName: data.firstName.trim(),
+            lastName: data.lastName.trim(),
+            email: data.email.trim(),
+            passwordHash: data.passwordHash.trim()
+
+        })
     });
+    console.log(data)
     if (!response.ok) {
         throw new Error('Error occured while creating user')
     }
-    return await response.json()
+    return await response.text()
 }
 
 // Funtion for getting all users.
