@@ -114,10 +114,34 @@ export async function createNewTasklist(token: string, projectId: string, taskLi
         if (!response.ok) {
             throw new Error('Error occured fetching projects')
         }
+    
         const jsonData = await response.json()
         return jsonData;
     } catch (error: unknown) {
         console.error('Error fetching token: ', error);
+        throw error;
+    }
+}
+
+   export async function createNewProject(projectTitle: string, description: string): Promise<Response> {
+    try {
+        const token = localStorage.getItem('token')
+        const headers: Record<string,string> = { 'Content-Type': 'application/json' }
+        if (token) headers['Authorization'] = `Bearer ${token}`
+
+        const response = await fetch(`${url}/api/projects`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ title: projectTitle.trim(), description: description.trim() })
+        })
+        if (!response.ok) {
+            const body = await response.text().catch(() => '')
+            throw new Error(`Error occured creating project: ${response.status} ${response.statusText} ${body}`)
+        }
+        const jsonData = await response.json()
+        return jsonData;
+    } catch (error: unknown) {
+        console.error('Error fetching project: ', error);
         throw error;
     }
 }
