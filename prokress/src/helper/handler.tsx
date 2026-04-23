@@ -69,7 +69,7 @@ export async function getProjectsForUser(token: string | null): Promise<projectT
     const response = await fetch(`${url}/api/projects`, {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer: ${token}`
+            'Authorization': `Bearer ${token}`
         },
     })
     if (!response.ok) {
@@ -126,12 +126,12 @@ export async function createNewTasklist(token: string, projectId: string, taskLi
    export async function createNewProject(projectTitle: string, description: string): Promise<Response> {
     try {
         const token = localStorage.getItem('token')
-        const headers: Record<string,string> = { 'Content-Type': 'application/json' }
-        if (token) headers['Authorization'] = `Bearer ${token}`
-
         const response = await fetch(`${url}/api/projects`, {
             method: 'POST',
-            headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer: ${token}`
+            },
             body: JSON.stringify({ title: projectTitle.trim(), description: description.trim() })
         })
         if (!response.ok) {
