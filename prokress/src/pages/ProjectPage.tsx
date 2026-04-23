@@ -37,7 +37,7 @@ function ProjectPage() {
             createNewTask(token, id, taskListId, taskTitle, description);
         }
     }
-    
+ 
     const deleteTaskList = (taskListId: number) => {
         const token = localStorage.getItem("token");
         if(token && id) {

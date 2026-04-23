@@ -69,7 +69,7 @@ export async function getProjectsForUser(token: string | null): Promise<projectT
     const response = await fetch(`${url}/api/projects`, {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer: ${token}`
         },
     })
     if (!response.ok) {
@@ -114,7 +114,7 @@ export async function createNewTasklist(token: string, projectId: string, taskLi
         if (!response.ok) {
             throw new Error('Error occured fetching projects')
         }
-    
+
         const jsonData = await response.json()
         return jsonData;
     } catch (error: unknown) {
@@ -123,7 +123,7 @@ export async function createNewTasklist(token: string, projectId: string, taskLi
     }
 }
 
-   export async function createNewProject(projectTitle: string, description: string): Promise<Response> {
+export async function createNewProject(projectTitle: string, description: string, is_shared: boolean): Promise<Response> {
     try {
         const token = localStorage.getItem('token')
         const response = await fetch(`${url}/api/projects`, {
@@ -132,7 +132,7 @@ export async function createNewTasklist(token: string, projectId: string, taskLi
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer: ${token}`
             },
-            body: JSON.stringify({ title: projectTitle.trim(), description: description.trim() })
+            body: JSON.stringify({ title: projectTitle.trim(), description: description.trim(), is_shared: is_shared })
         })
         if (!response.ok) {
             const body = await response.text().catch(() => '')
