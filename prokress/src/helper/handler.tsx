@@ -145,13 +145,31 @@ export async function createNewProject(projectTitle: string, description: string
         throw error;
     }
 }
+export async function deleteProject(token: string, projectId: string): Promise<Response> {
+    try {
+        const response = await fetch(`${url}/api/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer: ${token}`
+            }
+        })
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`)
+        }
+        return response;
+    } catch (error) {
+        console.error('Failed to delete project')
+        throw new Error(`error something went wrong while deleting`)
+    }
+}
 
 // function to delete tasklist
 export async function deleteTasklist(token: string, projectId: string, taskListId: number): Promise<Response> {
     try {
         const response = await fetch(`${url}/api/projects/${projectId}/tasklists/${taskListId}`, {
             method: 'DELETE',
-            headers:  {
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer: ${token}`
             },
@@ -175,7 +193,7 @@ export async function createNewTask(token: string, projectId: string, taskListId
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer: ${token}`
             },
-            body: JSON.stringify({ title: taskTitle.trim(), description: description.trim()})
+            body: JSON.stringify({ title: taskTitle.trim(), description: description.trim() })
         })
         if (!response.ok) {
             throw new Error('Error occured fetching projects')
