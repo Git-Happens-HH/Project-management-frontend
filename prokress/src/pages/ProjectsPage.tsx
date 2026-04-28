@@ -6,9 +6,12 @@ import type { projectType } from '../helper/types.ts'
 import ContextMenu from '../Components/ContextMenu.tsx'
 
 function ProjectsPage() {
+    // contextMenu
     const [contextMenuMode, setContextMenuMode] = useState<"project" | "task" | null>(null);
-    const [contextMenuId, setContextMenuId] = useState<number>();
+    const [contextMenuId, setContextMenuId] = useState<number>(0);
     const [pos, setPos] = useState({ x: 0, y: 0 });
+
+    // rest of app
     const [myProjects, setMyProjects] = useState<projectType[]>([]);
     const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
     const [isProjectDialogOpen, setProjectDialogOpen] = useState(false)
@@ -54,7 +57,7 @@ function ProjectsPage() {
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     setContextMenuMode("project");
-                                    setContextMenuId(e.currentTarget.id);
+                                    setContextMenuId(parseInt(e.currentTarget.id));
                                     setPos({ x: e.pageX, y: e.pageY });
                                 }}>
                                 <ProjectCard project={project} index={index} />
@@ -77,7 +80,7 @@ function ProjectsPage() {
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     setContextMenuMode("project");
-                                    setContextMenuId(e.currentTarget.id);
+                                    setContextMenuId(parseInt(e.currentTarget.id));
                                     setPos({ x: e.pageX, y: e.pageY });
                                 }}>
                                 <ProjectCard project={project} index={index} />
@@ -95,20 +98,6 @@ function ProjectsPage() {
     <ProjectDialogCreation
         isOpen={isProjectDialogOpen}
         toggleDialog={() => setProjectDialogOpen(false)}
-        /*onCreate={(payload) => {
-           const newProject: projectType = {
-              projectId: Date.now().toString(),
-              title: payload.name,
-              description: payload.description ?? '',
-              createdAt: curDate,
-              isShared: creatingShared
-           }
-           if (creatingShared) {
-              setSharedProjects(prev => [...prev, newProject])
-           } else {
-              setMyProjects(prev => [...prev, newProject])
-           }
-        }}*/
         is_shared={creatingShared}
     />
     {
@@ -118,6 +107,8 @@ function ProjectsPage() {
                 mode={contextMenuMode}
                 toggleContextMenu={() => setContextMenuMode(null)}
                 contextMenuId={contextMenuId}
+                taskListId={0}
+                projectId={""}
                 positions={pos} />
         )
     }

@@ -3,7 +3,7 @@ import {createNewProject} from '../helper/handler.tsx'
 
 interface ProjectPayload {
     name: string
-    description?: string
+    description?: string | undefined
 }
 
 interface Props {
@@ -22,7 +22,7 @@ const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog, is_share
         try {
             //onCreate({ ...form, name: form.name.trim() })
             //console.log(form)
-            createNewProject(form.name, form.description, is_shared)
+            createNewProject(form.name, form.description ?? "", is_shared)
             toggleDialog()
         } catch (err) {
             console.error('Project create failed', err)
@@ -32,11 +32,11 @@ const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog, is_share
     return (
         <div
             onClick={toggleDialog}
-            className="fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-opacity-60 backdrop-blur-xs transition-opacity duration-300"
+            className="fixed inset-0 z-999 grid h-screen w-screen place-items-center bg-opacity-60 backdrop-blur-xs transition-opacity duration-300"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="relative mx-auto w-full max-w-[28rem] rounded-lg overflow-hidden shadow-sm bg-white"
+                className="relative mx-auto w-full max-w-md rounded-lg overflow-hidden shadow-sm bg-white"
             >
                 <form onSubmit={handleSubmit} className="relative flex flex-col bg-white">
                     <div className="relative m-2.5 items-center flex justify-center text-white h-20 rounded-md bg-(--prokress-violet)">

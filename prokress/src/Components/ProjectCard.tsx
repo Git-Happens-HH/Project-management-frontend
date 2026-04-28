@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { deleteProject } from '../helper/handler';
 import type { projectType } from '../helper/types'
 
 type projectCardProps = {
