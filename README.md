@@ -1,20 +1,69 @@
-# Project management app
-## Licenses
+# Prokress
+[![Node](https://img.shields.io/badge/Node-18.17.1-339933)](https://nodejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-4.4.9-646cff)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.7-38B2AC)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/Git-Happens-HH/Project-management-frontend/blob/main/LICENSE)
+[![GitHub Actions](https://img.shields.io/badge/-GitHub_Actions-2088FF?style=flat&logo=github&logoColor=white)](https://github.com/Git-Happens-HH/Project-management-frontend/actions)
 
-## Description
-Toteutettavan sovelluksen tarkoitus on luoda toimiva projektinhallintatyökalu, joka eroaa kilpailijoista jollain tavalla.
 
-## Features
-Sovelluksen tärkeimmät ominaisuudet ovat projektin luonti, tehtävien luonti, drag and drop toiminto tehtäville, käyttäjätunnukset ja kirjautuminen, kalenteri, käyttäjille voi lisätä rooleja kuten scrum master/testaaja/devaaja/projektipäällikkö, käyttäjä voi katsoa mitä kaikkia tehtäviä jollain tietyllä käyttäjällä on työn alla, kaikki projektit voi nähdä yhdestä näkymästä.
+## Project Name and Description
 
-# Teknologiat
-FrontEnd
-  - React
-  - Tailwind
+Prokress is a project management application designed to help teams manage projects, tasks, user roles, and work progress in one place.
 
-Backend
-  - Java
-  - PostgreSQL
+### Current Features
 
-# Liitteet
-(Desing screenshots)
+- User registration and authentication with JWT-based login
+- Create personal and shared projects
+- Organize tasks with task lists within projects
+- Real-time task management - add and remove tasks instantly
+- Drag and drop functionality for task management
+- Real-time task tracking with WebSocket support
+- User-friendly interface with responsive design
+
+### Upcoming Features
+
+- Task editing capability
+- Task commenting
+- Task assignment to specific team members
+- User role management and permissions
+- Custom background image selection
+- Advanced search functionality for tasks
+- Calendar and backlog view navigation
+- Team member management for project managers
+
+## Backlog
+
+- GitHub Projects backlog: [Git-Happens-HH project 1](https://github.com/orgs/Git-Happens-HH/projects/1)
+
+## Production Deployments
+
+- Backend: [https://project-management-app-prokress-backend.2.rahtiapp.fi/](https://project-management-app-prokress-backend.2.rahtiapp.fi/)
+- Frontend: [https://yellow-mud-05a9abf03.1.azurestaticapps.net](https://yellow-mud-05a9abf03.1.azurestaticapps.net)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Git-Happens-HH/Project-management-backend/blob/main/LICENSE) file for details.
+
+## Technologies
+
+- Node 22.18.0
+- Vite 7.2.4
+- React 19.2.0
+- Tailwind CSS 4.1.18
+- stompjs 2.3.3
+- dndkit 6.3.1
+- typescript 5.9.3
+
+## Deployment & CI/CD
+
+The application uses GitHub Actions for continuous integration and deployment.
+
+### GitHub Actions Workflows
+
+- Automatic deployment from main
+
+### Deployment Infrastructure
+
+- Backend deployed on Rahti (OpenShift) with PostgreSQL database
+- Frontend deployed on Azure Static Web Apps
+- OpenShift manifests in [ops/openshift/](ops/openshift/) - Kubernetes deployment configurations, services, and routes
