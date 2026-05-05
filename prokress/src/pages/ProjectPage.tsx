@@ -51,7 +51,7 @@ function ProjectPage() {
             createNewTasklist(token, id, taskListTitle);
         }
     }
- 
+
     const deleteTaskList = (taskListId: number) => {
         const token = localStorage.getItem("token");
         if (token && id) {
@@ -176,7 +176,7 @@ function ProjectPage() {
                                     setPos({ x: e.pageX, y: e.pageY });
                                 }}
                             >
-                                <Task id={task.taskId.toString()} index={index.toString()} column={column} title={task.title} description={task.description} />
+                                <Task id={task.taskId} index={index} column={column} title={task.title} description={task.description} />
                             </div>
                         ))}
                         <div className="absolute top-[88%] flex flex-row gap-2">
@@ -226,18 +226,18 @@ function ProjectPage() {
                 projectId={projectId}
             />
             {
-        contextMenuMode && projectId && (
-            <ContextMenu
-                isOpen={true}
-                mode={contextMenuMode}
-                toggleContextMenu={() => setContextMenuMode(null)}
-                positions={pos}
-                projectId={projectId}
-                taskListId={taskListId}
-                contextMenuId={contextMenuId}
-            />
-        )
-    }
+                contextMenuMode && projectId && (
+                    <ContextMenu
+                        isOpen={true}
+                        mode={contextMenuMode}
+                        toggleContextMenu={() => setContextMenuMode(null)}
+                        positions={pos}
+                        projectId={projectId}
+                        taskListId={taskListId}
+                        contextMenuId={contextMenuId}
+                    />
+                )
+            }
         </div>
     );
 }
