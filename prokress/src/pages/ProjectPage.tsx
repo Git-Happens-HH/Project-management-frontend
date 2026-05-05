@@ -65,7 +65,7 @@ function ProjectPage() {
         const token = localStorage.getItem("token");
         if (!token) return;
         const res = await fetch(
-            `https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
+            `https://project-management-app-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +78,7 @@ function ProjectPage() {
         setTaskLists(transformed);
         if (!stompClient.current) {
             const socket = new SockJS(
-                "https://project-management-backend-prokress-backend.2.rahtiapp.fi/ws",
+                "https://project-management-app-prokress-backend.2.rahtiapp.fi/ws",
             );
             const client = new Client({
                 webSocketFactory: () => socket,
@@ -168,7 +168,7 @@ function ProjectPage() {
                     <TaskList key={column} id={column}>
                         
                     <div className="grid grid-rows-2">
-                        <div className="xl:h-115 lg:h-110 md:h-100 h-75">
+                        <div className="xl:h-75 lg:h-95 md:h-100 h-75">
                         {taskList.tasks.map((task, index) => (
                             <div key={task.taskId} id={task.taskId.toString()}
                                 onContextMenu={(e) => {

@@ -2,7 +2,7 @@ import { decodeToken, isExpired } from "react-jwt";
 import type { projectType } from "./types";
 
 const url: string =
-    "https://project-management-backend-prokress-backend.2.rahtiapp.fi";
+    "https://project-management-app-prokress-backend.2.rahtiapp.fi";
 
 interface Task {
     taskId: number;
@@ -28,7 +28,7 @@ interface userPayload {
 
 // Function for sending new Users registerations into backend.
 export async function registerHandler(data: userPayload): Promise<string> {
-    const response = await fetch("https://project-management-backend-prokress-backend.2.rahtiapp.fi/register", {
+    const response = await fetch("https://project-management-app-prokress-backend.2.rahtiapp.fi/register", {
         //const response = await fetch(api_url + '/api/register', {
         method: 'POST',
         headers: {
