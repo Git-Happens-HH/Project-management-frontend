@@ -1,4 +1,4 @@
-import { useJwt } from "react-jwt";
+import { decodeToken, isExpired } from "react-jwt";
 import type { projectType } from "./types";
 
 const url: string =
@@ -9,7 +9,7 @@ interface Task {
     title: string;
     description: string;
 }
-    
+
 interface TaskList {
     taskListId: number;
     projectId: string;
@@ -95,9 +95,26 @@ export async function getProjectsForUser(
 }
 
 // decoder for userWebToken
-export async function decodeUserWebToken(token: string) {
-    const { decodedToken, isExpired } = useJwt(token);
-    return { decodedToken, isExpired };
+export function decodeUserWebToken() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        return {
+            decoded: null,
+            expired: true,
+        };
+    }
+    try {
+        const decoded = decodeToken(token);
+        const expired = isExpired(token);
+        return {
+            decoded, expired,
+        }
+    } catch (error) {
+        return {
+            decoded: null,
+            expired: true,
+        }
+    }
 }
 
 export function transformTaskLists(data: unknown) {
