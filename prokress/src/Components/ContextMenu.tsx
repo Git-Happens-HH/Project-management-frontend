@@ -1,101 +1,112 @@
 import { deleteProject, deleteTask } from "../helper/handler";
+import type { Task } from "../pages/ProjectPage";
 
 interface BaseContextMenu {
-    isOpen: boolean;
-    toggleContextMenu: () => void;
-    positions: { x: number, y: number };
+  isOpen: boolean;
+  toggleContextMenu: () => void;
+  positions: { x: number; y: number };
 }
 
 type ProjectMode = BaseContextMenu & {
-    mode: "project";
-    contextMenuId: number;
-}
+  mode: "project";
+  contextMenuId: number;
+};
 
 type TaskMode = BaseContextMenu & {
-    mode: "task";
-    projectId: string;
-    taskListId: number;
-    contextMenuId: number;
-    onEditTask: (taskId: number) => void;
-}
+  mode: "task";
+  projectId: string;
+  taskListId: number;
+  contextMenuId: number;
+  onEditTask: (taskId: number) => void;
+};
 
 type ContextMenuProps = ProjectMode | TaskMode;
 
 const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
-    const deleteProjectById = (projectId: string) => {
-        const token = localStorage.getItem("token");
-        if (token && projectId) {
-            if (confirm("Do you want to delete this project?")) {
-                deleteProject(token, projectId);
-            }
-        }
+  const deleteProjectById = (projectId: string) => {
+    const token = localStorage.getItem("token");
+    if (token && projectId) {
+      if (confirm("Do you want to delete this project?")) {
+        deleteProject(token, projectId);
+      }
     }
-    const deleteTaskById = (projectId: string, taskListId: number, taskId: number) => {
-        const token = localStorage.getItem("token");
-        if (token && projectId) {
-            if (confirm("Do you want to delete this task?")) {
-                deleteTask(token, projectId, taskListId, taskId)
-            }
-        }
+  };
+  const deleteTaskById = (
+    projectId: string,
+    taskListId: number,
+    taskId: number,
+  ) => {
+    const token = localStorage.getItem("token");
+    if (token && projectId) {
+      if (confirm("Do you want to delete this task?")) {
+        deleteTask(token, projectId, taskListId, taskId);
+      }
     }
+  };
 
-    const isProject = props.mode === "project";
+  //   const activateEditTaskDialog = ({
+  //     projectId: string,
+  //     taskListId: number,
+  //     taskId: number,
+  //   }) => {
+  //     const token = localStorage.getItem("token");
+  //   };
 
-     return (
-        <div
-            className="fixed z-999 grid h-screen w-screen"
-            onClick={props.toggleContextMenu}
-            onContextMenu={props.toggleContextMenu}
-        >
-            <div
-                onClick={(e) => e.stopPropagation()}
-                className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100)"
-                style={{ left: props.positions.x, top: props.positions.y - 90 }}
+  const isProject = props.mode === "project";
+
+  return (
+    <div
+      className="fixed z-999 grid h-screen w-screen"
+      onClick={props.toggleContextMenu}
+      onContextMenu={props.toggleContextMenu}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100)"
+        style={{ left: props.positions.x, top: props.positions.y - 90 }}
+      >
+        {isProject && (
+          <ul>
+            <li
+              onClick={() => deleteProjectById(props.contextMenuId.toString())}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
             >
-                {isProject && (
-                    <ul>
-                        <li
-                            onClick={() => deleteProjectById(props.contextMenuId.toString())}
-                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
-                        >
-                            Delete Project
-                        </li>
+              Delete Project
+            </li>
 
-                        <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center">
-                            Edit
-                        </li>
-                    </ul>
-                )}
+            <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center">
+              Edit
+            </li>
+          </ul>
+        )}
 
-                {!isProject && (
-                    <ul>
-                        <li
-                            onClick={() =>
-                                deleteTaskById(
-                                    props.projectId,
-                                    props.taskListId,
-                                    props.contextMenuId
-                                )
-                            }
-                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
-                        >
-                            Delete Task
-                        </li>
+        {!isProject && (
+          <ul>
+            <li
+              onClick={() =>
+                deleteTaskById(
+                  props.projectId,
+                  props.taskListId,
+                  props.contextMenuId,
+                )
+              }
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+            >
+              Delete Task
+            </li>
 
-                        <li
-                            onClick={() => {
-                                props.onEditTask(props.contextMenuId); 
-                                props.toggleContextMenu();
-                            }}
-                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
-                        >
-                            Edit
-                        </li>
-                    </ul>
-                )}
-            </div>
-        </div>
-    );
+            <li
+              // contextMenuId == taskID
+              onClick={() => props.onEditTask(props.contextMenuId)}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+            >
+              Edit
+            </li>
+          </ul>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ContextMenu;
