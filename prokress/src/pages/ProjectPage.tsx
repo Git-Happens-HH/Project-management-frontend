@@ -176,7 +176,7 @@ function ProjectPage() {
                                     setPos({ x: e.pageX, y: e.pageY });
                                 }}
                             >
-                                <Task id={task.taskId} index={index} column={column} title={task.title} description={task.description} />
+                                <Task id={task.taskId.toString()} index={index} column={column} title={task.title} description={task.description} />
                             </div>
                         ))}
                         <div className="absolute top-[88%] flex flex-row gap-2">
