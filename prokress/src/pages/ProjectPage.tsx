@@ -65,7 +65,7 @@ function ProjectPage() {
         const token = localStorage.getItem("token");
         if (!token) return;
         const res = await fetch(
-            `https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
+            `https://project-management-app-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +78,7 @@ function ProjectPage() {
         setTaskLists(transformed);
         if (!stompClient.current) {
             const socket = new SockJS(
-                "https://project-management-backend-prokress-backend.2.rahtiapp.fi/ws",
+                "https://project-management-app-prokress-backend.2.rahtiapp.fi/ws",
             );
             const client = new Client({
                 webSocketFactory: () => socket,
@@ -166,6 +166,9 @@ function ProjectPage() {
             >
                 {Object.entries(taskLists).map(([column, taskList]) => (
                     <TaskList key={column} id={column}>
+                        
+                    <div className="grid grid-rows-2">
+                        <div className="xl:h-75 lg:h-95 md:h-100 h-75">
                         {taskList.tasks.map((task, index) => (
                             <div key={task.taskId} id={task.taskId.toString()}
                                 onContextMenu={(e) => {
@@ -179,7 +182,9 @@ function ProjectPage() {
                                 <Task id={task.taskId.toString()} index={index} column={column} title={task.title} description={task.description} />
                             </div>
                         ))}
-                        <div className="absolute top-[88%] flex flex-row gap-2">
+                        </div>
+
+                        <div className="flex flex-row gap-2 mt-auto">
                             <div
                                 onClick={() => {
                                     deleteTaskList(taskList.taskListId);
@@ -202,7 +207,7 @@ function ProjectPage() {
                                     setTaskListId(taskList.taskListId);
                                     //setProjectId(id)
                                 }}
-                                className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500"
+                                className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange)"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -215,6 +220,7 @@ function ProjectPage() {
                                 </svg>{" "}
                             </div>
                         </div>
+                    </div>
                     </TaskList>
                 ))}
             </div>
