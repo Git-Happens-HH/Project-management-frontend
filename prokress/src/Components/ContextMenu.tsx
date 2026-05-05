@@ -3,7 +3,7 @@ import { deleteProject, deleteTask } from "../helper/handler";
 interface BaseContextMenu {
     isOpen: boolean;
     toggleContextMenu: () => void;
-    positions: {x: number, y: number};
+    positions: { x: number, y: number };
 }
 
 type ProjectMode = BaseContextMenu & {
@@ -16,15 +16,16 @@ type TaskMode = BaseContextMenu & {
     projectId: string;
     taskListId: number;
     contextMenuId: number;
+    onEditTask: (taskId: number) => void;
 }
 
 type ContextMenuProps = ProjectMode | TaskMode;
 
-const ContextMenu: React.FC<ContextMenuProps> = (ContextMenuProps: ContextMenuProps) => {
+const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
     const deleteProjectById = (projectId: string) => {
         const token = localStorage.getItem("token");
         if (token && projectId) {
-            if (confirm("Do you really want to delete!")) {
+            if (confirm("Do you want to delete this project?")) {
                 deleteProject(token, projectId);
             }
         }
@@ -32,36 +33,69 @@ const ContextMenu: React.FC<ContextMenuProps> = (ContextMenuProps: ContextMenuPr
     const deleteTaskById = (projectId: string, taskListId: number, taskId: number) => {
         const token = localStorage.getItem("token");
         if (token && projectId) {
-            if (confirm("Do you really want to delete!")) {
+            if (confirm("Do you want to delete this task?")) {
                 deleteTask(token, projectId, taskListId, taskId)
             }
         }
     }
 
-    const isProject = ContextMenuProps.mode === "project";
-    
-    return (
-        <div className="fixed z-999 grid h-screen w-screen transition-opacity duration-300" onClick={ContextMenuProps.toggleContextMenu} onContextMenu={ContextMenuProps.toggleContextMenu}>
-            <div onClick={(e) => e.stopPropagation()} className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100) text-black" style={{ left: ContextMenuProps.positions.x + 'px', top: ContextMenuProps.positions.y - 90 + 'px' }}>
-                {isProject && (
-                    <div>
-                        <ul>
-                            <li onClick={() => { deleteProjectById(ContextMenuProps.contextMenuId.toString()) }} className="block px-4 py-2 rounded-md hover:bg-(--prokress-orange) text-black text-center" >Delete Project</li>
+    const isProject = props.mode === "project";
 
-                            <li className="block px-4 py-2 rounded-md hover:bg-(--prokress-orange) text-black text-center" >Edit</li>
-                        </ul>
-                    </div>
+     return (
+        <div
+            className="fixed z-999 grid h-screen w-screen"
+            onClick={props.toggleContextMenu}
+            onContextMenu={props.toggleContextMenu}
+        >
+            <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100)"
+                style={{ left: props.positions.x, top: props.positions.y - 90 }}
+            >
+                {isProject && (
+                    <ul>
+                        <li
+                            onClick={() => deleteProjectById(props.contextMenuId.toString())}
+                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+                        >
+                            Delete Project
+                        </li>
+
+                        <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center">
+                            Edit
+                        </li>
+                    </ul>
                 )}
+
                 {!isProject && (
-                    <div onClick={(e) => e.stopPropagation()}>
-                        <ul>
-                            <li onClick={() => { deleteTaskById(ContextMenuProps.projectId, ContextMenuProps.taskListId, ContextMenuProps.contextMenuId) }} className="block px-4 py-2 rounded-md hover:bg-(--prokress-orange) text-black text-center" >Delete Task</li>
-                            <li className="block px-4 py-2 rounded-md hover:bg-(--prokress-orange) text-black text-center" >Edit</li>
-                        </ul>
-                    </div>
+                    <ul>
+                        <li
+                            onClick={() =>
+                                deleteTaskById(
+                                    props.projectId,
+                                    props.taskListId,
+                                    props.contextMenuId
+                                )
+                            }
+                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+                        >
+                            Delete Task
+                        </li>
+
+                        <li
+                            onClick={() => {
+                                props.onEditTask(props.contextMenuId); 
+                                props.toggleContextMenu();
+                            }}
+                            className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+                        >
+                            Edit
+                        </li>
+                    </ul>
                 )}
             </div>
         </div>
-    )
-}
-export default ContextMenu
+    );
+};
+
+export default ContextMenu;

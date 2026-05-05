@@ -200,7 +200,7 @@ export async function deleteProject(token: string, projectId: string): Promise<R
         return response;
     } catch (error) {
         console.error('Failed to delete project')
-        throw new Error(`error something went wrong while deleting`)
+        throw new Error(`Error while deleting`)
     }
 }
 
@@ -286,5 +286,48 @@ export async function deleteTask(
     } catch (error) {
         console.error("Failed to delete tasklist");
         throw new Error(`Error something whent wrong while deleting: ${error}`);
+    }
+}
+
+
+//  EDIT TASK helper
+export async function editTask(
+    projectId: string,
+    taskListId: number,
+    taskId: number,
+    taskData: {}
+
+): Promise<Response> {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            `${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks/${taskId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer: ${token}`, 
+                },
+                body: JSON.stringify({
+                    taskId: taskId,
+                    title: title.trim() ?? "",
+                    description: description.trim() ?? "",
+                    deadline: `${deadline}T00:00`,
+                    assignedUser: null
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Error occured editing task");
+        }
+
+        const jsonData = await response.json();
+        return jsonData;
+
+    } catch (error: unknown) {
+        console.error("Error editing task: ", error);
+        throw error;
     }
 }
