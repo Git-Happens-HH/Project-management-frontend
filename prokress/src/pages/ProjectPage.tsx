@@ -166,6 +166,9 @@ function ProjectPage() {
             >
                 {Object.entries(taskLists).map(([column, taskList]) => (
                     <TaskList key={column} id={column}>
+                        
+                    <div className="grid grid-rows-2">
+                        <div className="xl:h-115 lg:h-110 md:h-100 h-75">
                         {taskList.tasks.map((task, index) => (
                             <div key={task.taskId} id={task.taskId.toString()}
                                 onContextMenu={(e) => {
@@ -179,7 +182,9 @@ function ProjectPage() {
                                 <Task id={task.taskId.toString()} index={index} column={column} title={task.title} description={task.description} />
                             </div>
                         ))}
-                        <div className="absolute top-[88%] flex flex-row gap-2">
+                        </div>
+
+                        <div className="flex flex-row gap-2 mt-auto">
                             <div
                                 onClick={() => {
                                     deleteTaskList(taskList.taskListId);
@@ -215,6 +220,7 @@ function ProjectPage() {
                                 </svg>{" "}
                             </div>
                         </div>
+                    </div>
                     </TaskList>
                 ))}
             </div>
