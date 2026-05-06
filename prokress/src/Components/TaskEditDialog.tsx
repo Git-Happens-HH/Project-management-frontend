@@ -1,5 +1,5 @@
 import { useState, useEffect, type SubmitEvent } from "react";
-import { editTask, getTaskData } from "../helper/handler";
+import { editTask } from "../helper/handler";
 import type { Task } from "../pages/ProjectPage";
 
 interface Props {
@@ -17,24 +17,27 @@ const EditTaskDialog: React.FC<Props> = ({
   taskListId,
   task,
 }) => {
+  console.log("The task that was passed is: ", task);
   const [taskData, setTaskData] = useState({
-    taskId: task?.taskId || 0,
-    title: task?.title || "",
-    description: task?.description || "",
-    deadline: task?.deadline?.split("T")[0] || "",
+    taskId: 0,
+    title: "",
+    description: "",
+    deadline: "",
   });
 
-  // useEffect(() => {
-  //     if (isOpen && task) {
-  //         setTaskData({
-  //             title: task.title || "",
-  //             description: task.description || "",
-  //             deadline: task.deadline?.split("T")[0] || "",
-  //         });
-  //     }
-  // }, [isOpen, task]);
+  useEffect(() => {
+    if (!task) return;
+    setTaskData({
+      taskId: task.taskId,
+      title: task.title,
+      description: task.description,
+      deadline: task.deadline?.split("T")[0],
+    });
+    console.log("Task data that was set: ", taskData);
+  }, [task]);
 
   if (!isOpen) return null;
+  if (!task) return <div>Loading...</div>;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

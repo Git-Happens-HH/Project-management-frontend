@@ -42,10 +42,10 @@ function ProjectPage() {
   const projectId: string | undefined = id;
 
   const handleEditClick = async (taskId: number) => {
+    setIsEditTaskDialogOpen(true);
     const token = localStorage.getItem("token");
     const task = await getTaskData(token, projectId, taskListId, taskId);
     setSelectedTask(task);
-    setIsEditTaskDialogOpen(true);
   };
 
   const closeEditDialog = () => {
@@ -86,11 +86,11 @@ function ProjectPage() {
     const token = localStorage.getItem("token");
     if (!token) return;
     const res = await fetch(
-      `https://project-management-backend-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
+      `https://project-management-app-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer: ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       },
     );
@@ -99,7 +99,7 @@ function ProjectPage() {
     setTaskLists(transformed);
     if (!stompClient.current) {
       const socket = new SockJS(
-        "https://project-management-backend-prokress-backend.2.rahtiapp.fi/ws",
+        "https://project-management-app-prokress-backend.2.rahtiapp.fi/ws",
       );
       const client = new Client({
         webSocketFactory: () => socket,
@@ -257,7 +257,7 @@ function ProjectPage() {
       <EditTaskDialog
         isOpen={isEditTaskDialogOpen}
         taskListId={taskListId}
-        toggleDialog={() => closeEditDialog}
+        toggleDialog={closeEditDialog}
         projectId={projectId}
         task={selectedTask}
       />
