@@ -1,5 +1,4 @@
 import { deleteProject, deleteTask } from "../helper/handler";
-import type { Task } from "../pages/ProjectPage";
 
 interface BaseContextMenu {
   isOpen: boolean;
