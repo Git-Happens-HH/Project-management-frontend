@@ -16,7 +16,7 @@ type TaskMode = BaseContextMenu & {
   projectId: string;
   taskListId: number;
   contextMenuId: number;
-  onEditTask: (taskId: number) => void;
+  onEditTask: (taskId: number, taskListId: number) => void;
 };
 
 type ContextMenuProps = ProjectMode | TaskMode;
@@ -96,7 +96,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
 
             <li
               // contextMenuId == taskID
-              onClick={() => props.onEditTask(props.contextMenuId)}
+              onClick={() => props.onEditTask(props.contextMenuId, props.taskListId)}
               className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
             >
               Edit

@@ -109,7 +109,8 @@ function ProjectsPage() {
                 contextMenuId={contextMenuId}
                 taskListId={0}
                 projectId={""}
-                positions={pos} />
+                positions={pos}
+                onEditTask={() => {}} />
         )
     }
         </div >
