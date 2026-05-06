@@ -15,17 +15,16 @@ Prokress is a project management application designed to help teams manage proje
 - User registration and authentication with JWT-based login
 - Create personal and shared projects
 - Organize tasks with task lists within projects
-- Real-time task management - add and remove tasks instantly
+- Real-time task management - add, edit and remove tasks instantly
 - Drag and drop functionality for task management
 - Real-time task tracking with WebSocket support
 - User-friendly interface with responsive design
 
 ### Upcoming Features
 
-- Task editing capability
-- Task commenting
 - Task assignment to specific team members
 - User role management and permissions
+- Task commenting
 - Custom background image selection
 - Advanced search functionality for tasks
 - Calendar and backlog view navigation
