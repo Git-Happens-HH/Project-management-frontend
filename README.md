@@ -10,6 +10,12 @@
 
 Prokress is a project management application designed to help teams manage projects, tasks, user roles, and work progress in one place.
 
+## Demo
+
+<video src="prokress/public/Prokress Demo.mp4" controls width="640">
+  Your browser does not support the video tag. <a href="prokress/public/Prokress Demo.mp4">Download video</a>.
+</video>
+
 ### Current Features
 
 - User registration and authentication with JWT-based login
@@ -42,6 +48,11 @@ Prokress is a project management application designed to help teams manage proje
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Git-Happens-HH/Project-management-backend/blob/main/LICENSE) file for details.
+
+
+## Application Architecture
+<img src="prokress/public/Prokress-architectual-image-1.png" alt="Description" width="500">
+
 
 ## Technologies
 
