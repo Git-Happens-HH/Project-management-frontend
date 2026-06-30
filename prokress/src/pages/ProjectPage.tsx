@@ -32,6 +32,8 @@ interface TaskList {
 type TaskListsState = Record<string, TaskList>;
 
 function ProjectPage() {
+   const url: string ="http://localhost:8080"
+
    let { id } = useParams<{ id: string }>();
    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
    const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] =
@@ -86,7 +88,7 @@ function ProjectPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
       const res = await fetch(
-         `https://project-management-app-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
+         url + `/api/projects/${projectId}/tasklists`,
          {
             headers: {
                "Content-Type": "application/json",
@@ -99,7 +101,7 @@ function ProjectPage() {
       setTaskLists(transformed);
       if (!stompClient.current) {
          const socket = new SockJS(
-            "https://project-management-app-prokress-backend.2.rahtiapp.fi/ws"
+            url + "/ws"
          );
          const client = new Client({
             webSocketFactory: () => socket,
