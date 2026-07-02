@@ -63,6 +63,7 @@ function ProjectPage() {
 
    let stompClient = useRef<Client | null>(null);
    let subscription = useRef<StompSubscription | null>(null);
+   const pendingProjectId = useRef<string | null>(null);
    const [taskLists, setTaskLists] = useState<TaskListsState>({});
 
    const newTaskList = () => {
@@ -85,6 +86,7 @@ function ProjectPage() {
    const openProject = async (projectId: string) => {
       const token = localStorage.getItem("token");
       if (!token) return;
+      pendingProjectId.current = projectId;
       const res = await fetch(
          `https://project-management-app-prokress-backend.2.rahtiapp.fi/api/projects/${projectId}/tasklists`,
          {
@@ -105,7 +107,9 @@ function ProjectPage() {
             webSocketFactory: () => socket,
             debug: (str) => console.log(str),
             onConnect: () => {
-               subscribeToProject(projectId);
+               if (pendingProjectId.current) {
+                  subscribeToProject(pendingProjectId.current);
+               }
             },
             onStompError: (frame) => {
                console.error(frame);
@@ -113,7 +117,7 @@ function ProjectPage() {
          });
          client.activate();
          stompClient.current = client;
-      } else {
+      } else if (stompClient.current.connected) {
          subscribeToProject(projectId);
       }
    };
