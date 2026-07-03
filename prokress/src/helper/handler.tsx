@@ -382,3 +382,30 @@ export async function editTask(
     throw error;
   }
 }
+
+export async function moveHandler (projectId: string, taskListId: number, taskId: number, newTaskListId: number): Promise<Response> {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks/${taskId}/to/${newTaskListId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer: ${token}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Error occured moving task");
+    }
+
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error: unknown) {
+    console.error("Error moving task: ", error);
+    throw error;
+  }
+}
+
