@@ -3,10 +3,11 @@ import {CollisionPriority} from '@dnd-kit/abstract';
 
 type Props = {
     children: React.ReactNode
-    id: string
+    id: number
+    taskListTitle: string
 }
 
-function TaskList ({children, id}: Props) {
+function TaskList ({children, id, taskListTitle}: Props) {
    const {isDropTarget, ref} = useDroppable({
     id,
     type: 'column',
@@ -17,7 +18,7 @@ function TaskList ({children, id}: Props) {
 
    return (
       <div ref={ref} style={style} className="border-solid rounded-xl min-w-87.5 h-[75vh] p-2 bg-(--prokress-beige-0) shadow overflow-auto"> 
-         <h1 className="text-(--prokress-black-700) text-lg font-bold">{id}</h1>
+         <h1 className="text-(--prokress-black-700) text-lg font-bold">{taskListTitle}</h1>
          {children}
       </div>
    )

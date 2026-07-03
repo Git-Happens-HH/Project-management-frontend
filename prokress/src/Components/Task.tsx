@@ -4,7 +4,7 @@ import {useSortable} from '@dnd-kit/react/sortable'
 interface TaskProps {
   id: string;
   index: number;
-  column: string;
+  column: number;
   title: string;
   description: string;
 }

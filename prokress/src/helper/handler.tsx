@@ -1,9 +1,9 @@
 import { decodeToken, isExpired } from "react-jwt";
 import type { projectType } from "./types";
 
-const url: string =
-  "https://project-management-app-prokress-backend.2.rahtiapp.fi";
-
+//const url: string =
+//  "https://project-management-app-prokress-backend.2.rahtiapp.fi";
+const url: string = "http://localhost:8080";
 interface Task {
   taskId: number;
   title: string;
@@ -30,7 +30,7 @@ interface userPayload {
 // Function for sending new Users registerations into backend.
 export async function registerHandler(data: userPayload): Promise<string> {
   const response = await fetch(
-    "https://project-management-app-prokress-backend.2.rahtiapp.fi/register",
+    url + "/register",
     {
       //const response = await fetch(api_url + '/api/register', {
       method: "POST",
