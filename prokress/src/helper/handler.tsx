@@ -18,7 +18,7 @@ interface TaskList {
   tasks: Task[];
 }
 
-type TaskListsState = Record<string, TaskList>;
+type TaskListsState = Record<number, TaskList>;
 interface userPayload {
   userName: string;
   firstName: string;
@@ -127,16 +127,39 @@ export function transformTaskLists(data: unknown) {
   if (!Array.isArray(data)) return result;
 
   data.forEach((list: any) => {
-    result[list.title] = {
-      taskListId: list.taskListId,
-      projectId: list.projectId,
-      title: list.title,
-      tasks: list.tasks.map((task: any) => ({
-        taskId: task.taskId,
-        title: task.title,
-        description: task.description,
-      })),
-    };
+    const taskListId = list.taskListId;
+    if (!result[taskListId]) {
+      result[taskListId] = {
+        taskListId,
+        projectId: list.projectId,
+        title: list.title,
+        tasks: [],
+      };
+    }
+
+    for (const task of list.tasks ?? []) {
+      const resolvedTaskListId = task.taskList?.taskListId ?? taskListId;
+      if (!result[resolvedTaskListId]) {
+        result[resolvedTaskListId] = {
+          taskListId: resolvedTaskListId,
+          projectId: list.projectId,
+          title: task.taskList?.title ?? list.title,
+          tasks: [],
+        };
+      }
+
+      const taskAlreadyRendered = Object.values(result).some((taskList) =>
+        taskList.tasks.some((existingTask) => existingTask.taskId === task.taskId),
+      );
+
+      if (!taskAlreadyRendered) {
+        result[resolvedTaskListId].tasks.push({
+          taskId: task.taskId,
+          title: task.title,
+          description: task.description,
+        });
+      }
+    }
   });
   return result;
 }
