@@ -29,7 +29,13 @@ function Task({ id, index, column, title, description, onContextMenu }: TaskProp
       },
    });
    return (
-      <div ref={ ref } onContextMenu={onContextMenu} className={`flex flex-col rounded w-[330px] border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) transition-all duration-300 ease-in-out ${isCollapsed ? 'h-10 overflow-hidden p-2' : 'h-32 p-2'}`} id={id}>
+         <div
+       ref={ref}
+      onContextMenu={onContextMenu}
+         className={`flex flex-col rounded w-[330px] border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) transition-all duration-300 ease-in-out ${
+          isCollapsed ? "h-10 overflow-hidden p-2" : "h-32 p-2"
+          }`}
+         >
          <div className='flex pb-1'>
             <p className="w-9/10 text-md">{title}</p>
             <button className="rounded-full w-0.8/10 hover:bg-gray-100 p-0.2" onClick={toggleCollapse}>
