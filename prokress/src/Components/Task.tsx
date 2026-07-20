@@ -1,5 +1,4 @@
 import {useState} from 'react'
-import {useSortable} from '@dnd-kit/react/sortable'
 
 interface TaskProps {
   id: string;
@@ -8,29 +7,20 @@ interface TaskProps {
   title: string;
   description: string;
   onContextMenu?: React.MouseEventHandler<HTMLDivElement>;
+  onDragStart?: React.DragEventHandler<HTMLDivElement>;
+  onDragEnd?: React.DragEventHandler<HTMLDivElement>;
 }
 
-function Task({ id, index, column, title, description, onContextMenu }: TaskProps) {
+function Task({ index, title, description, onContextMenu, onDragStart, onDragEnd }: TaskProps) {
    const [isCollapsed, setIsCollapsed] = useState(index >= 4);
    const toggleCollapse = () => {
       setIsCollapsed(!isCollapsed);
    };
-   const { ref } = useSortable({
-      id,
-      index,
-      type: 'item',
-      accept: 'item',
-      group: column,
-      data: {
-         taskId: Number(id),
-         title,
-         description,
-         taskListId: column,
-      },
-   });
    return (
          <div
-       ref={ref}
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onContextMenu={onContextMenu}
          className={`flex flex-col rounded w-[330px] border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) transition-all duration-300 ease-in-out ${
           isCollapsed ? "h-10 overflow-hidden p-2" : "h-32 p-2"

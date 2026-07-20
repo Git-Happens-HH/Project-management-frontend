@@ -15,9 +15,6 @@ import type { IMessage, StompSubscription } from "@stomp/stompjs";
 import TaskDialog from "../Components/TaskDialog.tsx";
 import ContextMenu from "../Components/ContextMenu.tsx";
 import EditTaskDialog from "../Components/TaskEditDialog.tsx";
-import { DragDropProvider, DragOverlay } from "@dnd-kit/react";
-import { isSortableOperation } from "@dnd-kit/dom/sortable";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 export interface Task {
    taskId: number;
@@ -34,12 +31,6 @@ interface TaskList {
 }
 
 type TaskListsState = Record<number, TaskList>;
-type DragTaskData = {
-   taskId: number;
-   title: string;
-   description: string;
-   taskListId: number;
-};
 
 function ProjectPage() {
    //const url: string =
@@ -81,7 +72,21 @@ function ProjectPage() {
    const [taskLists, setTaskLists] = useState<TaskListsState>({});
    const [serverTaskLists, setServerTaskLists] =
       useState<TaskListsState>({});
-   const isDragging = useRef(false);
+   const [draggedTask, setDraggedTask] = useState<{
+      taskId: number;
+      fromListId: number;
+   } | null>(null);
+   const [activeDropListId, setActiveDropListId] = useState<number | null>(null);
+
+   useEffect(() => {
+      console.log("taskLists changed");
+      console.log(taskLists);
+   }, [taskLists]);
+
+   useEffect(() => {
+      console.log("serverTaskLists changed");
+      console.log(serverTaskLists);
+   }, [serverTaskLists]);
 
    const newTaskList = () => {
       const token = localStorage.getItem("token");
@@ -100,6 +105,11 @@ function ProjectPage() {
       }
    };
 
+   const applyTaskLists = (transformed: TaskListsState) => {
+      setServerTaskLists(transformed);
+      setTaskLists(transformed);
+   };
+
    const openProject = async (projectId: string) => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -115,8 +125,7 @@ function ProjectPage() {
       );
       const data = await res.json();
       const transformed: TaskListsState = transformTaskLists(data);
-      setServerTaskLists(transformed);
-      setTaskLists(transformed);
+      applyTaskLists(transformed);
 
       if (!stompClient.current) {
          const socket = new SockJS(
@@ -147,11 +156,13 @@ function ProjectPage() {
       subscription.current = stompClient.current.subscribe(
          `/topic/project/${projectId}`,
          (msg: IMessage) => {
+            console.log("WEBSOCKET MESSAGE");
+            console.log(JSON.parse(msg.body));
             const transformed: TaskListsState = transformTaskLists(
                JSON.parse(msg.body)
             );
 
-            setServerTaskLists(transformed);
+            applyTaskLists(transformed);
          }
       );
    }
@@ -166,10 +177,43 @@ function ProjectPage() {
    }, [id]);
 
 
-   useEffect(() => {
-      if (isDragging.current) return;
-      setTaskLists(serverTaskLists);
-   }, [serverTaskLists]);
+   const handleDragStart = (
+      event: React.DragEvent<HTMLDivElement>,
+      taskId: number,
+      fromListId: number
+   ) => {
+      event.dataTransfer.effectAllowed = "move";
+      setDraggedTask({ taskId, fromListId });
+   };
+
+   const handleDropTask = async (targetListId: number) => {
+      if (!draggedTask || !id) return;
+
+      const { taskId, fromListId } = draggedTask;
+      if (fromListId === targetListId) {
+         setDraggedTask(null);
+         setActiveDropListId(null);
+         return;
+      }
+
+      try {
+         await moveHandler(id, fromListId, taskId, targetListId);
+         void openProject(id);
+      } catch (error) {
+         console.error("Move failed", error);
+      } finally {
+         setDraggedTask(null);
+         setActiveDropListId(null);
+      }
+   };
+
+   console.log("RENDER");
+   Object.values(taskLists).forEach((list) => {
+      console.log(
+         list.title,
+         list.tasks.map((t) => t.title)
+      );
+   });
 
 
    return (
@@ -216,68 +260,48 @@ function ProjectPage() {
             id="taskListContainer"
             className="flex min-h-[70%] w-[76%] gap-2 p-3 overflow-auto bg-(--prokress-beige-50) rounded-2xl shadow"
          >
-            <DragDropProvider
-               onDragStart={() => {
-                  isDragging.current = true;
-               }}
-               onDragEnd={async (event) => {
-                  try {
-                     if (event.canceled) return;
+            {Object.entries(taskLists).map(([, taskList]) => {
+               const uniqueTasks = Array.from(
+                  new Map(taskList.tasks.map((task) => [task.taskId, task])).values()
+               );
 
-                     const operation = event.operation;
-
-                     if (!isSortableOperation(operation)) return;
-
-                     const { source, target } = operation;
-
-                     if (!source || !target) return;
-
-                     await moveHandler(
-                        id!,
-                        Number(source.initialGroup),
-                        Number(source.id),
-                        Number(target.group ?? target.id)
-                     );
-                  } catch (e) {
-                     setTaskLists(serverTaskLists);
-                  } finally {
-                     isDragging.current = false;
-                  }
-               }}
-            >
-               {Object.entries(taskLists).map(([, taskList]) => {
-                  const uniqueTasks = Array.from(
-                     new Map(taskList.tasks.map((task) => [task.taskId, task])).values()
-                  );
-
-                  return (
-                     <TaskList key={taskList.taskListId} id={taskList.taskListId} taskListTitle={taskList.title} >
-                        <SortableContext
-
-                           id={taskList.taskListId.toString()}
-                           items={uniqueTasks.map((task) => task.taskId.toString())}
-                           strategy={verticalListSortingStrategy}
-                        >
-
-                           {uniqueTasks.map((task, index) => (
-                              <Task
-                                 key={task.taskId}
-                                 id={task.taskId.toString()}
-                                 index={index}
-                                 column={taskList.taskListId}
-                                 title={task.title}
-                                 description={task.description}
-                                 onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    setContextMenuMode("task");
-                                    setContextMenuId(task.taskId);
-                                    setTaskListId(taskList.taskListId);
-                                    setPos({ x: e.pageX, y: e.pageY });
-                                 }}
-                              />
-                           ))}
-                        </SortableContext>
-                        <div className="absolute top-[88%] flex flex-row gap-2">
+               return (
+                  <TaskList
+                     key={taskList.taskListId}
+                     id={taskList.taskListId}
+                     taskListTitle={taskList.title}
+                     isDropTarget={activeDropListId === taskList.taskListId}
+                     onDragOver={(event: React.DragEvent<HTMLDivElement>) => {
+                        event.preventDefault();
+                        setActiveDropListId(taskList.taskListId);
+                     }}
+                     onDropTask={handleDropTask}
+                  >
+                     {uniqueTasks.map((task, index) => (
+                        <Task
+                           key={task.taskId}
+                           id={task.taskId.toString()}
+                           index={index}
+                           column={taskList.taskListId}
+                           title={task.title}
+                           description={task.description}
+                           onDragStart={(event: React.DragEvent<HTMLDivElement>) =>
+                              handleDragStart(event, task.taskId, taskList.taskListId)
+                           }
+                           onDragEnd={() => {
+                              setDraggedTask(null);
+                              setActiveDropListId(null);
+                           }}
+                           onContextMenu={(e) => {
+                              e.preventDefault();
+                              setContextMenuMode("task");
+                              setContextMenuId(task.taskId);
+                              setTaskListId(taskList.taskListId);
+                              setPos({ x: e.pageX, y: e.pageY });
+                           }}
+                        />
+                     ))}
+                     <div className="absolute top-[88%] flex flex-row gap-2">
                            <div
                               onClick={() => {
                                  deleteTaskList(taskList.taskListId);
@@ -313,27 +337,9 @@ function ProjectPage() {
                               </svg>{" "}
                            </div>
                         </div>
-                     </TaskList>
-                  );
-               })}
-               <DragOverlay dropAnimation={null}>
-                  {(source) => {
-                     const data = source?.data as DragTaskData | undefined;
-                     if (!data) return null;
-
-                     return (
-                        <div className="flex flex-col rounded w-[330px] border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) opacity-90 shadow-xl h-32 p-2">
-                           <div className="flex pb-1">
-                              <p className="w-9/10 text-md">{data.title}</p>
-                           </div>
-                           <div className="border-t pt-1">
-                              <p>{data.description}</p>
-                           </div>
-                        </div>
-                     );
-                  }}
-               </DragOverlay>
-            </DragDropProvider>
+                  </TaskList>
+               );
+            })}
          </div>
 
          <TaskDialog
