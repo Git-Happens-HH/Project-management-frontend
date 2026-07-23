@@ -450,7 +450,7 @@ function ProjectPage() {
                                  setIsDialogOpen(true);
                                  setTaskListId(taskList.taskListId);
                               }}
-                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500"
+                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange)"
                            >
                               <svg
                                  xmlns="http://www.w3.org/2000/svg"
