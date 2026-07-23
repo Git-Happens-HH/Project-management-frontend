@@ -46,7 +46,6 @@ export async function registerHandler(data: userPayload): Promise<string> {
       }),
     },
   );
-  console.log(data);
   if (!response.ok) {
     throw new Error("Error occured while creating user");
   }
@@ -157,6 +156,7 @@ export function transformTaskLists(data: unknown) {
           taskId: task.taskId,
           title: task.title,
           description: task.description,
+          deadline: task.deadline ?? "",
         });
       }
     }
@@ -281,7 +281,6 @@ export async function createNewTask(
 ): Promise<Response> {
   try {
     const token = localStorage.getItem("token");
-    console.log(projectId, taskListId, taskTitle, description, deadline);
     const response = await fetch(
       `${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks`,
       {
@@ -361,7 +360,6 @@ export async function getTaskData(
     }
     return await response.json();
   } catch (error) {
-    console.log(error);
     throw error;
   }
 }

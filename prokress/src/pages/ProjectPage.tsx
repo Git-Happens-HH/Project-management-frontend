@@ -12,12 +12,20 @@ import {
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import type { IMessage, StompSubscription } from "@stomp/stompjs";
+import {
+   DndContext,
+   closestCorners,
+   DragOverlay,
+   pointerWithin,
+   type CollisionDetection,
+   type DragEndEvent,
+   type DragOverEvent,
+   type DragStartEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import TaskDialog from "../Components/TaskDialog.tsx";
 import ContextMenu from "../Components/ContextMenu.tsx";
 import EditTaskDialog from "../Components/TaskEditDialog.tsx";
-import { DragDropProvider, DragOverlay } from "@dnd-kit/react";
-import { isSortableOperation } from "@dnd-kit/dom/sortable";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 export interface Task {
    taskId: number;
@@ -34,11 +42,30 @@ interface TaskList {
 }
 
 type TaskListsState = Record<number, TaskList>;
-type DragTaskData = {
+
+type PendingMove = {
+   sourceListId: number;
+   targetListId: number;
    taskId: number;
-   title: string;
-   description: string;
-   taskListId: number;
+   targetIndex?: number;
+};
+
+const taskDndId = (taskId: number) => `task-${taskId}`;
+const listDndId = (taskListId: number) => `list-${taskListId}`;
+
+const parseDndId = (value: string) => {
+   const match = value.match(/^(?:task|list)-(\d+)$/);
+   return match ? Number(match[1]) : Number(value);
+};
+
+const collisionDetection: CollisionDetection = (args) => {
+   const pointerCollisions = pointerWithin(args);
+
+   if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+   }
+
+   return closestCorners(args);
 };
 
 function ProjectPage() {
@@ -53,13 +80,15 @@ function ProjectPage() {
    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
    const [taskListId, setTaskListId] = useState<number>(0);
+   const [activeTask, setActiveTask] = useState<Task | null>(null);
    const projectId: string | undefined = id;
 
-   const handleEditClick = async (taskId: number) => {
-      setIsEditTaskDialogOpen(true);
+   const handleEditClick = async (taskId: number, listId: number) => {
+      setTaskListId(listId);
       const token = localStorage.getItem("token");
-      const task = await getTaskData(token, projectId, taskListId, taskId);
+      const task = await getTaskData(token, projectId, listId, taskId);
       setSelectedTask(task);
+      setIsEditTaskDialogOpen(true);
    };
 
    const closeEditDialog = () => {
@@ -73,15 +102,14 @@ function ProjectPage() {
    >(null);
    const [contextMenuId, setContextMenuId] = useState<number>(0);
    const [pos, setPos] = useState({ x: 0, y: 0 });
+   const dragSourceListId = useRef<number | null>(null);
+   const pendingMoveRef = useRef<PendingMove | null>(null);
    // end of context menu block
 
    let stompClient = useRef<Client | null>(null);
    let subscription = useRef<StompSubscription | null>(null);
    const pendingProjectId = useRef<string | null>(null);
    const [taskLists, setTaskLists] = useState<TaskListsState>({});
-   const [serverTaskLists, setServerTaskLists] =
-      useState<TaskListsState>({});
-   const isDragging = useRef(false);
 
    const newTaskList = () => {
       const token = localStorage.getItem("token");
@@ -100,6 +128,57 @@ function ProjectPage() {
       }
    };
 
+   const syncTaskLists = (nextTaskLists: TaskListsState) => {
+      setTaskLists(nextTaskLists);
+   };
+
+   const moveTaskInState = (
+      state: TaskListsState,
+      sourceListId: number,
+      targetListId: number,
+      taskId: number,
+      targetIndex?: number
+   ) => {
+      const next = { ...state };
+      const sourceList = next[sourceListId];
+      const targetList = next[targetListId];
+
+      if (!sourceList || !targetList) {
+         return state;
+      }
+
+      const sourceTasks = [...sourceList.tasks];
+      const taskToMove = sourceTasks.find((task) => task.taskId === taskId);
+      const sourceIndex = sourceTasks.findIndex((task) => task.taskId === taskId);
+
+      if (!taskToMove) {
+         return state;
+      }
+
+      const nextSourceTasks = sourceTasks.filter((task) => task.taskId !== taskId);
+
+      if (sourceListId === targetListId) {
+         const reorderedTasks = [...nextSourceTasks];
+         const normalizedTargetIndex = typeof targetIndex === "number" ? targetIndex : reorderedTasks.length;
+         const insertIndex =
+            sourceIndex >= 0 && normalizedTargetIndex > sourceIndex
+               ? normalizedTargetIndex - 1
+               : normalizedTargetIndex;
+
+         reorderedTasks.splice(insertIndex, 0, taskToMove);
+         next[sourceListId] = { ...sourceList, tasks: reorderedTasks };
+         return next;
+      }
+
+      const nextTargetTasks = [...targetList.tasks];
+      const insertIndex = typeof targetIndex === "number" ? targetIndex : nextTargetTasks.length;
+      nextTargetTasks.splice(insertIndex, 0, taskToMove);
+
+      next[sourceListId] = { ...sourceList, tasks: nextSourceTasks };
+      next[targetListId] = { ...targetList, tasks: nextTargetTasks };
+      return next;
+   };
+
    const openProject = async (projectId: string) => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -115,8 +194,7 @@ function ProjectPage() {
       );
       const data = await res.json();
       const transformed: TaskListsState = transformTaskLists(data);
-      setServerTaskLists(transformed);
-      setTaskLists(transformed);
+      syncTaskLists(transformed);
 
       if (!stompClient.current) {
          const socket = new SockJS(
@@ -124,7 +202,7 @@ function ProjectPage() {
          );
          const client = new Client({
             webSocketFactory: () => socket,
-            debug: (str) => console.log(str),
+            debug: () => undefined,
             onConnect: () => {
                if (pendingProjectId.current) {
                   subscribeToProject(pendingProjectId.current);
@@ -147,11 +225,22 @@ function ProjectPage() {
       subscription.current = stompClient.current.subscribe(
          `/topic/project/${projectId}`,
          (msg: IMessage) => {
-            const transformed: TaskListsState = transformTaskLists(
+            let transformed: TaskListsState = transformTaskLists(
                JSON.parse(msg.body)
             );
 
-            setServerTaskLists(transformed);
+            if (pendingMoveRef.current) {
+               transformed = moveTaskInState(
+                  transformed,
+                  pendingMoveRef.current.sourceListId,
+                  pendingMoveRef.current.targetListId,
+                  pendingMoveRef.current.taskId,
+                  pendingMoveRef.current.targetIndex
+               );
+               pendingMoveRef.current = null;
+            }
+
+            syncTaskLists(transformed);
          }
       );
    }
@@ -166,11 +255,92 @@ function ProjectPage() {
    }, [id]);
 
 
-   useEffect(() => {
-      if (isDragging.current) return;
-      setTaskLists(serverTaskLists);
-   }, [serverTaskLists]);
+   const updateTaskListsFromMove = (
+      sourceListId: number,
+      targetListId: number,
+      taskId: number,
+      targetIndex?: number
+   ) => {
+      setTaskLists((prev) => moveTaskInState(prev, sourceListId, targetListId, taskId, targetIndex));
+   };
 
+   const handleDragOver = (event: DragOverEvent) => {
+      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
+      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
+      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
+      const overType = event.over?.data.current?.type as string | undefined;
+      const activeRect = event.active.rect.current.translated;
+      const overRect = event.over?.rect;
+      const isBelowOverItem =
+         Boolean(activeRect && overRect) &&
+         activeRect!.top + activeRect!.height / 2 > overRect!.top + overRect!.height / 2;
+
+      const targetIndex =
+         overType === "list"
+            ? taskLists[targetListId]?.tasks.length ?? 0
+            : (() => {
+                 const overIndex = event.over?.data.current?.index as number | undefined;
+                 if (typeof overIndex !== "number") {
+                    return undefined;
+                 }
+
+                 return overIndex + (isBelowOverItem ? 1 : 0);
+              })();
+
+      if (Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
+         return;
+      }
+
+      pendingMoveRef.current = {
+         sourceListId: fromListId,
+         targetListId,
+         taskId,
+         targetIndex,
+      };
+
+      updateTaskListsFromMove(fromListId, targetListId, taskId, targetIndex);
+   };
+
+   const handleDragStart = (event: DragStartEvent) => {
+      dragSourceListId.current = Number(event.active.data.current?.listId);
+      setActiveTask({
+         taskId: Number(event.active.data.current?.taskId ?? event.active.id),
+         title: String(event.active.data.current?.title ?? ""),
+         description: String(event.active.data.current?.description ?? ""),
+         deadline: String(event.active.data.current?.deadline ?? ""),
+      });
+   };
+
+   const handleDragEnd = async (event: DragEndEvent) => {
+      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
+      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
+      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
+
+      if (!id || Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
+         return;
+      }
+
+      if (fromListId === targetListId) {
+         dragSourceListId.current = null;
+         pendingMoveRef.current = null;
+         return;
+      }
+
+      try {
+         pendingMoveRef.current = {
+            sourceListId: fromListId,
+            targetListId,
+            taskId,
+            targetIndex: pendingMoveRef.current?.targetIndex,
+         };
+         await moveHandler(id, fromListId, taskId, targetListId);
+      } catch (error) {
+         console.error("Move failed", error);
+      } finally {
+         dragSourceListId.current = null;
+         setActiveTask(null);
+      }
+   };
 
    return (
       <div className="flex flex-col min-h-screen items-center bg-(--prokress-beige-100)">
@@ -212,38 +382,15 @@ function ProjectPage() {
                </svg>
             </button>
          </div>
-         <div
-            id="taskListContainer"
-            className="flex min-h-[70%] w-[76%] gap-2 p-3 overflow-auto bg-(--prokress-beige-50) rounded-2xl shadow"
+         <DndContext
+            collisionDetection={collisionDetection}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
          >
-            <DragDropProvider
-               onDragStart={() => {
-                  isDragging.current = true;
-               }}
-               onDragEnd={async (event) => {
-                  try {
-                     if (event.canceled) return;
-
-                     const operation = event.operation;
-
-                     if (!isSortableOperation(operation)) return;
-
-                     const { source, target } = operation;
-
-                     if (!source || !target) return;
-
-                     await moveHandler(
-                        id!,
-                        Number(source.initialGroup),
-                        Number(source.id),
-                        Number(target.group ?? target.id)
-                     );
-                  } catch (e) {
-                     setTaskLists(serverTaskLists);
-                  } finally {
-                     isDragging.current = false;
-                  }
-               }}
+            <div
+               id="taskListContainer"
+               className="flex min-h-[70%] w-[76%] gap-2 p-3 overflow-auto bg-(--prokress-beige-50) rounded-2xl shadow"
             >
                {Object.entries(taskLists).map(([, taskList]) => {
                   const uniqueTasks = Array.from(
@@ -251,18 +398,22 @@ function ProjectPage() {
                   );
 
                   return (
-                     <TaskList key={taskList.taskListId} id={taskList.taskListId} taskListTitle={taskList.title} >
+                     <TaskList
+                        key={taskList.taskListId}
+                        id={listDndId(taskList.taskListId)}
+                        taskListTitle={taskList.title}
+                        taskCount={uniqueTasks.length}
+                     >
                         <SortableContext
-
-                           id={taskList.taskListId.toString()}
-                           items={uniqueTasks.map((task) => task.taskId.toString())}
+                           items={uniqueTasks.map((task) => taskDndId(task.taskId))}
                            strategy={verticalListSortingStrategy}
                         >
-
                            {uniqueTasks.map((task, index) => (
                               <Task
                                  key={task.taskId}
-                                 id={task.taskId.toString()}
+                                 id={taskDndId(task.taskId)}
+                                 taskId={task.taskId}
+                                 listId={taskList.taskListId}
                                  index={index}
                                  column={taskList.taskListId}
                                  title={task.title}
@@ -298,7 +449,6 @@ function ProjectPage() {
                               onClick={() => {
                                  setIsDialogOpen(true);
                                  setTaskListId(taskList.taskListId);
-                                 //setProjectId(id)
                               }}
                               className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500"
                            >
@@ -316,25 +466,27 @@ function ProjectPage() {
                      </TaskList>
                   );
                })}
-               <DragOverlay dropAnimation={null}>
-                  {(source) => {
-                     const data = source?.data as DragTaskData | undefined;
-                     if (!data) return null;
-
-                     return (
-                        <div className="flex flex-col rounded w-[330px] border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) opacity-90 shadow-xl h-32 p-2">
-                           <div className="flex pb-1">
-                              <p className="w-9/10 text-md">{data.title}</p>
-                           </div>
-                           <div className="border-t pt-1">
-                              <p>{data.description}</p>
-                           </div>
-                        </div>
-                     );
-                  }}
-               </DragOverlay>
-            </DragDropProvider>
-         </div>
+            </div>
+            <DragOverlay>
+               {activeTask && (
+                  <div className="flex flex-col rounded w-[330px] h-32 p-2 border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) shadow-2xl opacity-95 overflow-hidden">
+                     <div className="flex pb-1">
+                        <p className="w-9/10 text-md">{activeTask.title}</p>
+                        <button
+                           className="rounded-full w-0.8/10 hover:bg-gray-100 p-0.2"
+                           tabIndex={-1}
+                           aria-hidden="true"
+                        >
+                           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#00000"><path d="M200-200v-240h80v160h160v80H200Zm480-320v-160H520v-80h240v240h-80Z"/></svg>
+                        </button>
+                     </div>
+                     <div className="border-t pt-1">
+                        <p>{activeTask.description}</p>
+                     </div>
+                  </div>
+               )}
+            </DragOverlay>
+         </DndContext>
 
          <TaskDialog
             isOpen={isDialogOpen}
