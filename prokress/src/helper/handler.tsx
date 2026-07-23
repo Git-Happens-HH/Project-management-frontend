@@ -1,9 +1,9 @@
 import { decodeToken, isExpired } from "react-jwt";
 import type { projectType } from "./types";
 
-//const url: string =
-//  "https://project-management-app-prokress-backend.2.rahtiapp.fi";
-const url: string = "http://localhost:8080";
+const url: string =
+  "https://project-management-app-prokress-backend.2.rahtiapp.fi";
+//const url: string = "http://localhost:8080";
 interface Task {
   taskId: number;
   title: string;

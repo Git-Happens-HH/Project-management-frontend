@@ -69,9 +69,9 @@ const collisionDetection: CollisionDetection = (args) => {
 };
 
 function ProjectPage() {
-   //const url: string =
-   //  "https://project-management-app-prokress-backend.2.rahtiapp.fi";
-   const url: string = "http://localhost:8080";
+   const url: string =
+     "https://project-management-app-prokress-backend.2.rahtiapp.fi";
+   //const url: string = "http://localhost:8080";
 
    let { id } = useParams<{ id: string }>();
    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
