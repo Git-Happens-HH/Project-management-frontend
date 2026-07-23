@@ -3,7 +3,7 @@ import type { projectType } from "./types";
 
 const url: string =
   "https://project-management-app-prokress-backend.2.rahtiapp.fi";
-
+//const url: string = "http://localhost:8080";
 interface Task {
   taskId: number;
   title: string;
@@ -18,7 +18,7 @@ interface TaskList {
   tasks: Task[];
 }
 
-type TaskListsState = Record<string, TaskList>;
+type TaskListsState = Record<number, TaskList>;
 interface userPayload {
   userName: string;
   firstName: string;
@@ -30,7 +30,7 @@ interface userPayload {
 // Function for sending new Users registerations into backend.
 export async function registerHandler(data: userPayload): Promise<string> {
   const response = await fetch(
-    "https://project-management-app-prokress-backend.2.rahtiapp.fi/register",
+    url + "/register",
     {
       //const response = await fetch(api_url + '/api/register', {
       method: "POST",
@@ -46,7 +46,6 @@ export async function registerHandler(data: userPayload): Promise<string> {
       }),
     },
   );
-  console.log(data);
   if (!response.ok) {
     throw new Error("Error occured while creating user");
   }
@@ -127,16 +126,40 @@ export function transformTaskLists(data: unknown) {
   if (!Array.isArray(data)) return result;
 
   data.forEach((list: any) => {
-    result[list.title] = {
-      taskListId: list.taskListId,
-      projectId: list.projectId,
-      title: list.title,
-      tasks: list.tasks.map((task: any) => ({
-        taskId: task.taskId,
-        title: task.title,
-        description: task.description,
-      })),
-    };
+    const taskListId = list.taskListId;
+    if (!result[taskListId]) {
+      result[taskListId] = {
+        taskListId,
+        projectId: list.projectId,
+        title: list.title,
+        tasks: [],
+      };
+    }
+
+    for (const task of list.tasks ?? []) {
+      const resolvedTaskListId = task.taskList?.taskListId ?? taskListId;
+      if (!result[resolvedTaskListId]) {
+        result[resolvedTaskListId] = {
+          taskListId: resolvedTaskListId,
+          projectId: list.projectId,
+          title: task.taskList?.title ?? list.title,
+          tasks: [],
+        };
+      }
+
+      const taskAlreadyRendered = Object.values(result).some((taskList) =>
+        taskList.tasks.some((existingTask) => existingTask.taskId === task.taskId),
+      );
+
+      if (!taskAlreadyRendered) {
+        result[resolvedTaskListId].tasks.push({
+          taskId: task.taskId,
+          title: task.title,
+          description: task.description,
+          deadline: task.deadline ?? "",
+        });
+      }
+    }
   });
   return result;
 }
@@ -258,7 +281,6 @@ export async function createNewTask(
 ): Promise<Response> {
   try {
     const token = localStorage.getItem("token");
-    console.log(projectId, taskListId, taskTitle, description, deadline);
     const response = await fetch(
       `${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks`,
       {
@@ -338,7 +360,6 @@ export async function getTaskData(
     }
     return await response.json();
   } catch (error) {
-    console.log(error);
     throw error;
   }
 }
@@ -382,3 +403,30 @@ export async function editTask(
     throw error;
   }
 }
+
+export async function moveHandler (projectId: string, taskListId: number, taskId: number, newTaskListId: number): Promise<Response> {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks/${taskId}/to/${newTaskListId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer: ${token}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Error occured moving task");
+    }
+
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error: unknown) {
+    console.error("Error moving task: ", error);
+    throw error;
+  }
+}
+
