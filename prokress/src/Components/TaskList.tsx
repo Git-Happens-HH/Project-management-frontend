@@ -1,24 +1,33 @@
-import {useDroppable} from '@dnd-kit/react';
-import {CollisionPriority} from '@dnd-kit/abstract';
+import { useDroppable } from '@dnd-kit/core'
+import '../App.css'
 
 type Props = {
     children: React.ReactNode
-    id: string
+    id: string | number
+    taskListTitle: string
+   taskCount: number
+    isDropTarget?: boolean
 }
 
-function TaskList ({children, id}: Props) {
-   const {isDropTarget, ref} = useDroppable({
-    id,
-    type: 'column',
-    accept: 'item',
-    collisionPriority: CollisionPriority.Low,
+function TaskList ({children, id, taskListTitle, taskCount, isDropTarget}: Props) {
+   const numericListId = typeof id === 'number'
+      ? id
+      : Number(String(id).match(/^(?:task|list)-(\d+)$/)?.[1] ?? id);
+
+   const { setNodeRef, isOver } = useDroppable({
+      id,
+      data: { type: 'list', listId: numericListId, index: taskCount },
    });
-   const style = isDropTarget ? {background: '#00000030'} : undefined;
+   const style = isDropTarget || isOver ? { background: '#00000030' } : undefined;
 
    return (
-      <div ref={ref} style={style} className="border-solid rounded-xl min-w-87.5 h-[75vh] p-2 bg-(--prokress-beige-0) shadow overflow-auto"> 
-         <h1 className="text-(--prokress-black-700) text-lg font-bold">{id}</h1>
-         {children}
+      <div
+         className="border-solid rounded-xl min-w-87.5 h-[75vh] p-2 bg-(--prokress-beige-0) shadow flex flex-col"
+      >
+         <h1 className="text-(--prokress-black-700) text-lg font-bold">{taskListTitle}</h1>
+         <div ref={setNodeRef} style={style} className="flex-1 min-h-32 overflow-y-auto overflow-x-hidden scrollbar">
+            {children}
+         </div>
       </div>
    )
 }

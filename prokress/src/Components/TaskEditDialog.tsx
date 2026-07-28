@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { editTask } from "../helper/handler";
-import type { Task } from "../pages/ProjectPage";
+import type { Task } from "../helper/types.ts";
 
 interface Props {
    isOpen: boolean;
@@ -17,7 +17,6 @@ const EditTaskDialog: React.FC<Props> = ({
    taskListId,
    task,
 }) => {
-   console.log("The task that was passed is: ", task);
    const [taskData, setTaskData] = useState({
       taskId: 0,
       title: "",
@@ -33,7 +32,6 @@ const EditTaskDialog: React.FC<Props> = ({
          description: task.description,
          deadline: task.deadline?.split("T")[0],
       });
-      console.log("Task data that was set: ", taskData);
    }, [task]);
 
    if (!isOpen) return null;
