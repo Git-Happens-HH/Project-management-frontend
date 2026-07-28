@@ -26,7 +26,7 @@ const TaskDialog: React.FC<DialogProps> = ({
         try {
             if (!projectId) throw new Error("Missing projectId");
             if (taskListId == null) throw new Error("Missing taskListId");
-            
+
             await createNewTask(
                 String(projectId),
                 Number(taskListId),

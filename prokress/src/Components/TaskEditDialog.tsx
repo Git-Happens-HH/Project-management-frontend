@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { editTask } from "../helper/handler";
-import type { Task } from "../pages/ProjectPage";
+import type { Task } from "../helper/types.ts";
 
 interface Props {
    isOpen: boolean;

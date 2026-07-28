@@ -1,1 +1,18 @@
+.scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
 
+.scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 9999px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Firefox */
+.scrollbar {
+    scrollbar-width: thin; /* auto | thin | none */
+    scrollbar-color: #888 transparent;
+}
