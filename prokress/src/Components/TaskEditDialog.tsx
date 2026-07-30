@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { editTask } from "../helper/handler";
-import type { Task } from "../helper/types.ts";
+import type { TaskData } from "../helper/types.ts";
 
 interface Props {
    isOpen: boolean;
    toggleDialog: () => void;
    projectId: string | undefined;
    taskListId: number;
-   task: Task | null;
+   task: TaskData | null;
 }
 
 const EditTaskDialog: React.FC<Props> = ({
@@ -48,6 +48,7 @@ const EditTaskDialog: React.FC<Props> = ({
          console.error("Edit failed:", error);
       }
    };
+   const minDate = new Date().toISOString().split("T")[0];
 
    return (
       <div
@@ -63,9 +64,9 @@ const EditTaskDialog: React.FC<Props> = ({
                onSubmit={handleSubmit}
                className="relative flex flex-col bg-white"
             >
-            <div className="relative m-2.5 items-center flex justify-center text-white h-24 rounded-md bg-(--prokress-violet)">
-               <h3 className="text-2xl font-semibold">{"Edit Task"}</h3>
-            </div>
+               <div className="relative m-2.5 items-center flex justify-center text-white h-24 rounded-md bg-(--prokress-violet)">
+                  <h3 className="text-2xl font-semibold">{"Edit Task"}</h3>
+               </div>
                <div className="flex flex-col gap-4 p-6">
                   <div className="w-full max-w-sm min-w-50">
                      <label className="block mb-2 text-sm text-slate-600 font-medium">
@@ -105,6 +106,7 @@ const EditTaskDialog: React.FC<Props> = ({
                      <input
                         type="date"
                         value={taskData.deadline}
+                        min={minDate}
                         className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
                         onChange={(e) =>
                            setTaskData({
@@ -116,13 +118,13 @@ const EditTaskDialog: React.FC<Props> = ({
                   </div>
                </div>
                <div className="p-6 pt-0">
-                        <button
-                            type="submit"
-                            className="w-full rounded-md bg-(--prokress-violet) py-2.5 px-4 text-center text-sm font-semibold text-white hover:bg-(--prokress-orange) transition-all"
-                        >
-                            Save
-                        </button>
-                    </div>
+                  <button
+                     type="submit"
+                     className="w-full rounded-md bg-(--prokress-violet) py-2.5 px-4 text-center text-sm font-semibold text-white hover:bg-(--prokress-orange) transition-all"
+                  >
+                     Save
+                  </button>
+               </div>
             </form>
          </div>
       </div>
