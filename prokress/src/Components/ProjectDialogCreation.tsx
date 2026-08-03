@@ -10,10 +10,9 @@ interface Props {
     isOpen: boolean
     toggleDialog: () => void
     //onCreate: (payload: ProjectPayload) => Promise<void> | void
-    is_shared: boolean
 }
 
-const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog, is_shared }) => {
+const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog }) => {
     const [form, setForm] = useState<ProjectPayload>({ name: "", description: "" })
     if (!isOpen) return null
 
@@ -22,7 +21,7 @@ const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog, is_share
         try {
             //onCreate({ ...form, name: form.name.trim() })
             //console.log(form)
-            createNewProject(form.name, form.description ?? "", is_shared)
+            createNewProject(form.name, form.description ?? "")
             toggleDialog()
         } catch (err) {
             console.error('Project create failed', err)

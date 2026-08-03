@@ -25,7 +25,7 @@ function ProjectsPage() {
                 const tempSharedProjects: projectType[] = [];
                 const tempMyProjects: projectType[] = [];
                 for (const project of response) {
-                    if (project.isShared) {
+                    if (project.role === "member") {
                         tempSharedProjects.push(project)
                     } else (
                         tempMyProjects.push(project)
@@ -96,7 +96,6 @@ function ProjectsPage() {
     <ProjectDialogCreation
         isOpen={isProjectDialogOpen}
         toggleDialog={() => setProjectDialogOpen(false)}
-        is_shared={creatingShared}
     />
     {
         contextMenuMode && (
