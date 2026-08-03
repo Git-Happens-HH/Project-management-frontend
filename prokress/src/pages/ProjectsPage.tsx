@@ -15,7 +15,6 @@ function ProjectsPage() {
     const [myProjects, setMyProjects] = useState<projectType[]>([]);
     const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
     const [isProjectDialogOpen, setProjectDialogOpen] = useState(false)
-    const [creatingShared, setCreatingShared] = useState(false)
     const appUserId = localStorage.getItem('token')
 
     useEffect(() => {
@@ -63,7 +62,7 @@ function ProjectsPage() {
                             </div>
                         )
                     })}
-                    <div onClick={() => { setCreatingShared(false); setProjectDialogOpen(true); }}
+                    <div onClick={() => { setProjectDialogOpen(true); }}
                         className="min-w-80 h-55 rounded-lg mt-4 m-2 bg-(--prokress-beige-0) text-(--prokress-black-700) shadow-md flex justify-center items-center">
                         <div className="text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500)"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg></div>
                     </div>
@@ -87,7 +86,7 @@ function ProjectsPage() {
                         )
                     })}
                 <div
-                    onClick={() => { setCreatingShared(true); setProjectDialogOpen(true); }}
+                    onClick={() => { setProjectDialogOpen(true); }}
                     className="min-w-80 h-55 rounded-lg mt-4 m-2 bg-(--prokress-beige-0) text-(--prokress-black-700) shadow-md flex justify-center items-center">
                     <div className="text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500)"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg></div>
                 </div>
