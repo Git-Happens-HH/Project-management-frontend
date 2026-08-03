@@ -61,7 +61,7 @@ export async function getProjectsForUser(
    const response = await fetch(`${url}/api/projects`, {
       headers: {
          "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`,
+         Authorization: `Bearer: ${token}`,
       },
    });
    if (!response.ok) {
