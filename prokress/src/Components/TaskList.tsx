@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core'
+import '../App.css'
 
 type Props = {
     children: React.ReactNode
@@ -21,10 +22,10 @@ function TaskList ({children, id, taskListTitle, taskCount, isDropTarget}: Props
 
    return (
       <div
-         className="border-solid rounded-xl min-w-87.5 h-[75vh] p-2 bg-(--prokress-beige-0) shadow overflow-auto relative flex flex-col"
+         className="border-solid rounded-xl min-w-87.5 h-[75vh] p-2 bg-(--prokress-beige-0) shadow flex flex-col"
       >
          <h1 className="text-(--prokress-black-700) text-lg font-bold">{taskListTitle}</h1>
-         <div ref={setNodeRef} style={style} className="flex-1 min-h-32">
+         <div ref={setNodeRef} style={style} className="flex-1 min-h-32 overflow-y-auto overflow-x-hidden scrollbar">
             {children}
          </div>
       </div>

@@ -26,7 +26,7 @@ const TaskDialog: React.FC<DialogProps> = ({
         try {
             if (!projectId) throw new Error("Missing projectId");
             if (taskListId == null) throw new Error("Missing taskListId");
-            
+
             await createNewTask(
                 String(projectId),
                 Number(taskListId),
@@ -39,7 +39,7 @@ const TaskDialog: React.FC<DialogProps> = ({
             console.error("Task creation failed:", error);
         }
     };
-
+   const minDate = new Date().toISOString().split("T")[0];
     return (
         <div
             onClick={toggleDialog} /*Close dialog when clicking outside */
@@ -95,6 +95,7 @@ const TaskDialog: React.FC<DialogProps> = ({
                             <input
                                 required /* mandatory field */
                                 type="date"
+                                 min={minDate}
                                 className="w-full bg-transparent border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-950"
                                 onChange={(e) =>
                                     setTaskData({ ...taskData, deadline: e.target.value })

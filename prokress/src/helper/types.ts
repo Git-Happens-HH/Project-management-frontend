@@ -3,7 +3,7 @@ export type projectType = {
    title: string,
    description: string,
    createdAt: string,
-   isShared: boolean,
+   role: "owner" | "member"
 }
 
 export type appUser = {
@@ -15,3 +15,35 @@ export type appUser = {
     passwordHash: string,
     registeredAt: Date
 }
+
+export interface TaskData {
+   taskId: number;
+   title: string;
+   description: string;
+   deadline: string;
+}
+
+export interface TaskList {
+   taskListId: number;
+   projectId: string;
+   title: string;
+   tasks: TaskData[];
+}
+
+export type PendingMove = {
+   sourceListId: number;
+   targetListId: number;
+   taskId: number;
+   targetIndex?: number;
+};
+
+export type TaskListsState = Record<number, TaskList>;
+
+export interface userPayload {
+  userName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  passwordHash: string;
+}
+

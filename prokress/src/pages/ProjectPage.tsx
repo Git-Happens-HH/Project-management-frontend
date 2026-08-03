@@ -2,61 +2,22 @@ import TaskList from "../Components/TaskList.tsx";
 import Task from "../Components/Task.tsx";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import {
-   createNewTasklist,
-   deleteTasklist,
-   getTaskData,
-   moveHandler,
-   transformTaskLists,
-} from "../helper/handler.tsx";
+import { createNewTasklist, deleteTasklist, getTaskData, transformTaskLists } from "../helper/handler.tsx";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import type { IMessage, StompSubscription } from "@stomp/stompjs";
-import {
-   DndContext,
-   closestCorners,
-   DragOverlay,
-   pointerWithin,
-   type CollisionDetection,
-   type DragEndEvent,
-   type DragOverEvent,
-   type DragStartEvent,
-} from "@dnd-kit/core";
+import { DndContext, closestCorners, DragOverlay, pointerWithin, type CollisionDetection } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import TaskDialog from "../Components/TaskDialog.tsx";
 import ContextMenu from "../Components/ContextMenu.tsx";
 import EditTaskDialog from "../Components/TaskEditDialog.tsx";
-
-export interface Task {
-   taskId: number;
-   title: string;
-   description: string;
-   deadline: string;
-}
-
-interface TaskList {
-   taskListId: number;
-   projectId: string;
-   title: string;
-   tasks: Task[];
-}
-
-type TaskListsState = Record<number, TaskList>;
-
-type PendingMove = {
-   sourceListId: number;
-   targetListId: number;
-   taskId: number;
-   targetIndex?: number;
-};
+import { createDragHandlers, moveTaskInState } from "../helper/dndHandlers.ts";
+import type { PendingMove, TaskListsState, TaskData } from "../helper/types.ts";
+import { API_URL } from "../config";
+import "../App.css";
 
 const taskDndId = (taskId: number) => `task-${taskId}`;
 const listDndId = (taskListId: number) => `list-${taskListId}`;
-
-const parseDndId = (value: string) => {
-   const match = value.match(/^(?:task|list)-(\d+)$/);
-   return match ? Number(match[1]) : Number(value);
-};
 
 const collisionDetection: CollisionDetection = (args) => {
    const pointerCollisions = pointerWithin(args);
@@ -69,18 +30,15 @@ const collisionDetection: CollisionDetection = (args) => {
 };
 
 function ProjectPage() {
-   const url: string =
-     "https://project-management-app-prokress-backend.2.rahtiapp.fi";
-   //const url: string = "http://localhost:8080";
+   const url: string = API_URL;
 
    let { id } = useParams<{ id: string }>();
    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-   const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] =
-      useState<boolean>(false);
-   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+   const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState<boolean>(false);
+   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
    const [taskListId, setTaskListId] = useState<number>(0);
-   const [activeTask, setActiveTask] = useState<Task | null>(null);
+   const [activeTask, setActiveTask] = useState<TaskData | null>(null);
    const projectId: string | undefined = id;
 
    const handleEditClick = async (taskId: number, listId: number) => {
@@ -97,9 +55,7 @@ function ProjectPage() {
    };
 
    //context menu block
-   const [contextMenuMode, setContextMenuMode] = useState<
-      "project" | "task" | null
-   >(null);
+   const [contextMenuMode, setContextMenuMode] = useState<"project" | "task" | null>(null);
    const [contextMenuId, setContextMenuId] = useState<number>(0);
    const [pos, setPos] = useState({ x: 0, y: 0 });
    const dragSourceListId = useRef<number | null>(null);
@@ -111,6 +67,14 @@ function ProjectPage() {
    const pendingProjectId = useRef<string | null>(null);
    const [taskLists, setTaskLists] = useState<TaskListsState>({});
 
+   const { handleDragStart, handleDragOver, handleDragEnd } = createDragHandlers({
+      taskLists,
+      setTaskLists,
+      setActiveTask,
+      dragSourceListId,
+      pendingMoveRef,
+      projectId: id,
+   });
    const newTaskList = () => {
       const token = localStorage.getItem("token");
       let taskListTitle = prompt("New TaskList title", "TODO");
@@ -130,53 +94,6 @@ function ProjectPage() {
 
    const syncTaskLists = (nextTaskLists: TaskListsState) => {
       setTaskLists(nextTaskLists);
-   };
-
-   const moveTaskInState = (
-      state: TaskListsState,
-      sourceListId: number,
-      targetListId: number,
-      taskId: number,
-      targetIndex?: number
-   ) => {
-      const next = { ...state };
-      const sourceList = next[sourceListId];
-      const targetList = next[targetListId];
-
-      if (!sourceList || !targetList) {
-         return state;
-      }
-
-      const sourceTasks = [...sourceList.tasks];
-      const taskToMove = sourceTasks.find((task) => task.taskId === taskId);
-      const sourceIndex = sourceTasks.findIndex((task) => task.taskId === taskId);
-
-      if (!taskToMove) {
-         return state;
-      }
-
-      const nextSourceTasks = sourceTasks.filter((task) => task.taskId !== taskId);
-
-      if (sourceListId === targetListId) {
-         const reorderedTasks = [...nextSourceTasks];
-         const normalizedTargetIndex = typeof targetIndex === "number" ? targetIndex : reorderedTasks.length;
-         const insertIndex =
-            sourceIndex >= 0 && normalizedTargetIndex > sourceIndex
-               ? normalizedTargetIndex - 1
-               : normalizedTargetIndex;
-
-         reorderedTasks.splice(insertIndex, 0, taskToMove);
-         next[sourceListId] = { ...sourceList, tasks: reorderedTasks };
-         return next;
-      }
-
-      const nextTargetTasks = [...targetList.tasks];
-      const insertIndex = typeof targetIndex === "number" ? targetIndex : nextTargetTasks.length;
-      nextTargetTasks.splice(insertIndex, 0, taskToMove);
-
-      next[sourceListId] = { ...sourceList, tasks: nextSourceTasks };
-      next[targetListId] = { ...targetList, tasks: nextTargetTasks };
-      return next;
    };
 
    const openProject = async (projectId: string) => {
@@ -254,94 +171,6 @@ function ProjectPage() {
       };
    }, [id]);
 
-
-   const updateTaskListsFromMove = (
-      sourceListId: number,
-      targetListId: number,
-      taskId: number,
-      targetIndex?: number
-   ) => {
-      setTaskLists((prev) => moveTaskInState(prev, sourceListId, targetListId, taskId, targetIndex));
-   };
-
-   const handleDragOver = (event: DragOverEvent) => {
-      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
-      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
-      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
-      const overType = event.over?.data.current?.type as string | undefined;
-      const activeRect = event.active.rect.current.translated;
-      const overRect = event.over?.rect;
-      const isBelowOverItem =
-         Boolean(activeRect && overRect) &&
-         activeRect!.top + activeRect!.height / 2 > overRect!.top + overRect!.height / 2;
-
-      const targetIndex =
-         overType === "list"
-            ? taskLists[targetListId]?.tasks.length ?? 0
-            : (() => {
-                 const overIndex = event.over?.data.current?.index as number | undefined;
-                 if (typeof overIndex !== "number") {
-                    return undefined;
-                 }
-
-                 return overIndex + (isBelowOverItem ? 1 : 0);
-              })();
-
-      if (Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
-         return;
-      }
-
-      pendingMoveRef.current = {
-         sourceListId: fromListId,
-         targetListId,
-         taskId,
-         targetIndex,
-      };
-
-      updateTaskListsFromMove(fromListId, targetListId, taskId, targetIndex);
-   };
-
-   const handleDragStart = (event: DragStartEvent) => {
-      dragSourceListId.current = Number(event.active.data.current?.listId);
-      setActiveTask({
-         taskId: Number(event.active.data.current?.taskId ?? event.active.id),
-         title: String(event.active.data.current?.title ?? ""),
-         description: String(event.active.data.current?.description ?? ""),
-         deadline: String(event.active.data.current?.deadline ?? ""),
-      });
-   };
-
-   const handleDragEnd = async (event: DragEndEvent) => {
-      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
-      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
-      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
-
-      if (!id || Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
-         return;
-      }
-
-      if (fromListId === targetListId) {
-         dragSourceListId.current = null;
-         pendingMoveRef.current = null;
-         return;
-      }
-
-      try {
-         pendingMoveRef.current = {
-            sourceListId: fromListId,
-            targetListId,
-            taskId,
-            targetIndex: pendingMoveRef.current?.targetIndex,
-         };
-         await moveHandler(id, fromListId, taskId, targetListId);
-      } catch (error) {
-         console.error("Move failed", error);
-      } finally {
-         dragSourceListId.current = null;
-         setActiveTask(null);
-      }
-   };
-
    return (
       <div className="flex flex-col min-h-screen items-center bg-(--prokress-beige-100)">
          <div
@@ -390,7 +219,7 @@ function ProjectPage() {
          >
             <div
                id="taskListContainer"
-               className="flex min-h-[70%] w-[76%] gap-2 p-3 overflow-auto bg-(--prokress-beige-50) rounded-2xl shadow"
+               className="flex min-h-[70%] w-[76%] gap-2 p-3 overflow-auto bg-(--prokress-beige-50) rounded-2xl shadow scrollbar"
             >
                {Object.entries(taskLists).map(([, taskList]) => {
                   const uniqueTasks = Array.from(
@@ -430,18 +259,10 @@ function ProjectPage() {
                         </SortableContext>
                         <div className="absolute top-[88%] flex flex-row gap-2">
                            <div
-                              onClick={() => {
-                                 deleteTaskList(taskList.taskListId);
-                              }}
-                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500"
+                              onClick={() => {deleteTaskList(taskList.taskListId);}}
+                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500 z-10"
                            >
-                              <svg
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 height="24px"
-                                 viewBox="0 -960 960 960"
-                                 width="24px"
-                                 fill="#e3e3e3"
-                              >
+                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3" >
                                  <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
                               </svg>
                            </div>
@@ -450,17 +271,11 @@ function ProjectPage() {
                                  setIsDialogOpen(true);
                                  setTaskListId(taskList.taskListId);
                               }}
-                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange)"
+                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange) z-10"
                            >
-                              <svg
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 height="24px"
-                                 viewBox="0 -960 960 960"
-                                 width="24px"
-                                 fill="#fff"
-                              >
+                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff" >
                                  <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
-                              </svg>{" "}
+                              </svg>
                            </div>
                         </div>
                      </TaskList>
@@ -477,7 +292,7 @@ function ProjectPage() {
                            tabIndex={-1}
                            aria-hidden="true"
                         >
-                           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#00000"><path d="M200-200v-240h80v160h160v80H200Zm480-320v-160H520v-80h240v240h-80Z"/></svg>
+                           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#00000"><path d="M200-200v-240h80v160h160v80H200Zm480-320v-160H520v-80h240v240h-80Z" /></svg>
                         </button>
                      </div>
                      <div className="border-t pt-1">
