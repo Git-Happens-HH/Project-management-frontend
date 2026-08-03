@@ -392,3 +392,34 @@ export async function moveHandler(projectId: string, taskListId: number, taskId:
    }
 }
 
+export async function reorderTaskOrder(
+   projectId: string,
+   taskListId: number,
+   orderedTaskIds: number[],
+): Promise<Response> {
+   try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+         `${url}/api/projects/${projectId}/tasklists/${taskListId}/task-order`,
+         {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+               Authorization: `Bearer: ${token}`,
+            },
+            body: JSON.stringify(orderedTaskIds),
+         },
+      );
+
+      if (!response.ok) {
+         throw new Error("Error occured reordering task list");
+      }
+
+      return response;
+   } catch (error: unknown) {
+      console.error("Error reordering task list: ", error);
+      throw error;
+   }
+}
+
