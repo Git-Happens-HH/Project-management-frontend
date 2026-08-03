@@ -145,7 +145,7 @@ export function createDragHandlers({
 
          if (orderedTaskIds.length > 0) {
             try {
-               await reorderTaskOrder(id, fromListId, orderedTaskIds);
+               await reorderTaskOrder(projectId, fromListId, orderedTaskIds);
             } catch (error) {
                console.error("Reorder failed", error);
             }
