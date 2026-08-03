@@ -5,7 +5,7 @@ import type {
    DragStartEvent,
 } from "@dnd-kit/core";
 import type {TaskListsState, TaskData, PendingMove} from "../helper/types.ts";
-import { moveHandler } from "../helper/handler.tsx";
+import { moveHandler, reorderTaskOrder } from "../helper/handler.tsx";
 
 interface CreateDragHandlersProps {
    taskLists: TaskListsState;
@@ -141,6 +141,15 @@ export function createDragHandlers({
       }
 
       if (fromListId === targetListId) {
+         const orderedTaskIds = (taskLists[fromListId]?.tasks ?? []).map((task) => task.taskId);
+
+         if (orderedTaskIds.length > 0) {
+            try {
+               await reorderTaskOrder(id, fromListId, orderedTaskIds);
+            } catch (error) {
+               console.error("Reorder failed", error);
+            }
+         }
          dragSourceListId.current = null;
          pendingMoveRef.current = null;
          return;
