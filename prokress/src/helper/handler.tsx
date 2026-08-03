@@ -168,7 +168,6 @@ export async function createNewTasklist(
 export async function createNewProject(
    projectTitle: string,
    description: string,
-   is_shared: boolean,
 ): Promise<Response> {
    try {
       const token = localStorage.getItem("token");
@@ -181,7 +180,6 @@ export async function createNewProject(
          body: JSON.stringify({
             title: projectTitle.trim(),
             description: description.trim(),
-            is_shared: is_shared,
          }),
       });
       if (!response.ok) {

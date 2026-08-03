@@ -96,7 +96,6 @@ function ProjectsPage() {
     <ProjectDialogCreation
         isOpen={isProjectDialogOpen}
         toggleDialog={() => setProjectDialogOpen(false)}
-        is_shared={creatingShared}
     />
     {
         contextMenuMode && (
