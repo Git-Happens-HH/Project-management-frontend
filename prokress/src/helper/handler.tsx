@@ -224,7 +224,7 @@ export async function deleteProject(
 export async function deleteTasklist(
    token: string,
    projectId: string,
-   taskListId: number,
+   taskListId: string,
 ): Promise<Response> {
    try {
       const response = await fetch(`${url}/api/projects/${projectId}/tasklists/${taskListId}`, {
@@ -244,11 +244,10 @@ export async function deleteTasklist(
       throw new Error(`Error something whent wrong while deleting: ${error}`);
    }
 }
-
 // funtion to create new Task
 export async function createNewTask(
    projectId: string,
-   taskListId: number,
+   taskListId: string,
    taskTitle: string,
    description: string,
    deadline: string,
@@ -265,7 +264,7 @@ export async function createNewTask(
             title: taskTitle.trim() ?? "",
             description: description.trim() ?? "",
             deadline: `${deadline}T00:00`,
-            createdBy: { appUserId: 1 },
+            createdBy: { appUserId: "0763eedf-6782-479f-82f5-7cab338a6b49" },
             assignedUser: null,
          }),
       },
@@ -284,8 +283,8 @@ export async function createNewTask(
 export async function deleteTask(
    token: string,
    projectId: string,
-   taskListId: number,
-   taskId: number,
+   taskListId: string,
+   taskId: string,
 ): Promise<Response> {
    try {
       const response = await fetch(`${url}/api/projects/${projectId}/tasklists/${taskListId}/tasks/${taskId}`, {
@@ -310,8 +309,8 @@ export async function deleteTask(
 export async function getTaskData(
    token: string | null,
    projectId: string | undefined,
-   taskListId: number,
-   taskId: number,
+   taskListId: string,
+   taskId: string,
 ): Promise<TaskData> {
    try {
       // get task
@@ -335,7 +334,7 @@ export async function getTaskData(
 //  EDIT TASK helper
 export async function editTask(
    projectId: string | undefined,
-   taskListId: number,
+   taskListId: string,
    task: TaskData,
 ): Promise<Response> {
    try {
@@ -370,7 +369,7 @@ export async function editTask(
    }
 }
 
-export async function moveHandler(projectId: string, taskListId: number, taskId: number, newTaskListId: number): Promise<Response> {
+export async function moveHandler(projectId: string, taskListId: string, taskId: string, newTaskListId: string): Promise<Response> {
    try {
       const token = localStorage.getItem("token");
 

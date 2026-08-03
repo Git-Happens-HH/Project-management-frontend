@@ -4,28 +4,28 @@ import type {
    DragOverEvent,
    DragStartEvent,
 } from "@dnd-kit/core";
-import type {TaskListsState, TaskData, PendingMove} from "../helper/types.ts";
+import type { TaskListsState, TaskData, PendingMove } from "../helper/types.ts";
 import { moveHandler } from "../helper/handler.tsx";
 
 interface CreateDragHandlersProps {
    taskLists: TaskListsState;
    setTaskLists: React.Dispatch<React.SetStateAction<TaskListsState>>;
    setActiveTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
-   dragSourceListId: React.MutableRefObject<number | null>;
+   dragSourceListId: React.MutableRefObject<string | null>;
    pendingMoveRef: React.MutableRefObject<PendingMove | null>;
    projectId?: string;
 }
 
 export const parseDndId = (value: string) => {
-   const match = value.match(/^(?:task|list)-(\d+)$/);
-   return match ? Number(match[1]) : Number(value);
+   const match = value.match(/^(?:task|list)-(.+)$/);
+   return match ? match[1] : value;
 };
 
 export const moveTaskInState = (
    state: TaskListsState,
-   sourceListId: number,
-   targetListId: number,
-   taskId: number,
+   sourceListId: string,
+   targetListId: string,
+   taskId: string,
    targetIndex?: number
 ) => {
    const next = { ...state };
@@ -77,17 +77,23 @@ export function createDragHandlers({
    projectId,
 }: CreateDragHandlersProps) {
    const updateTaskListsFromMove = (
-      sourceListId: number,
-      targetListId: number,
-      taskId: number,
+      sourceListId: string,
+      targetListId: string,
+      taskId: string,
       targetIndex?: number
    ) => {
       setTaskLists((prev) => moveTaskInState(prev, sourceListId, targetListId, taskId, targetIndex));
    };
+
    const handleDragOver = (event: DragOverEvent) => {
-      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
-      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
-      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
+      const taskId = String(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
+      const fromListId = dragSourceListId.current ?? String(event.active.data.current?.listId);
+
+      // Fixed: Check if event.over exists before trying to extract listId
+      const targetListId = event.over?.data.current?.listId
+         ? String(event.over.data.current.listId)
+         : (event.over?.id ? parseDndId(String(event.over.id)) : null);
+
       const overType = event.over?.data.current?.type as string | undefined;
       const activeRect = event.active.rect.current.translated;
       const overRect = event.over?.rect;
@@ -97,7 +103,7 @@ export function createDragHandlers({
 
       const targetIndex =
          overType === "list"
-            ? taskLists[targetListId]?.tasks.length ?? 0
+            ? taskLists[targetListId!]?.tasks.length ?? 0
             : (() => {
                const overIndex = event.over?.data.current?.index as number | undefined;
                if (typeof overIndex !== "number") {
@@ -107,7 +113,8 @@ export function createDragHandlers({
                return overIndex + (isBelowOverItem ? 1 : 0);
             })();
 
-      if (Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
+      // Fixed: Better validation - check for null/undefined and empty strings
+      if (!taskId || !fromListId || !targetListId) {
          return;
       }
 
@@ -122,9 +129,9 @@ export function createDragHandlers({
    };
 
    const handleDragStart = (event: DragStartEvent) => {
-      dragSourceListId.current = Number(event.active.data.current?.listId);
+      dragSourceListId.current = String(event.active.data.current?.listId);
       setActiveTask({
-         taskId: Number(event.active.data.current?.taskId ?? event.active.id),
+         taskId: String(event.active.data.current?.taskId ?? event.active.id),
          title: String(event.active.data.current?.title ?? ""),
          description: String(event.active.data.current?.description ?? ""),
          deadline: String(event.active.data.current?.deadline ?? ""),
@@ -132,11 +139,15 @@ export function createDragHandlers({
    };
 
    const handleDragEnd = async (event: DragEndEvent) => {
-      const taskId = Number(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
-      const fromListId = dragSourceListId.current ?? Number(event.active.data.current?.listId);
-      const targetListId = Number(event.over?.data.current?.listId ?? (event.over?.id ? parseDndId(String(event.over.id)) : NaN));
+      const taskId = String(event.active.data.current?.taskId ?? parseDndId(String(event.active.id)));
+      const fromListId = dragSourceListId.current ?? String(event.active.data.current?.listId);
 
-      if (!projectId || Number.isNaN(taskId) || Number.isNaN(fromListId) || Number.isNaN(targetListId)) {
+      // Fixed: Same logic as handleDragOver
+      const targetListId = event.over?.data.current?.listId
+         ? String(event.over.data.current.listId)
+         : (event.over?.id ? parseDndId(String(event.over.id)) : null);
+
+      if (!projectId || !taskId || !fromListId || !targetListId) {
          return;
       }
 
@@ -163,7 +174,9 @@ export function createDragHandlers({
    };
    return {
       handleDragStart,
-      handleDragOver,
       handleDragEnd,
-   };
+      handleDragOver,
+   }
+
 }
+

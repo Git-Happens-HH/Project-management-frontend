@@ -17,27 +17,27 @@ export type appUser = {
 }
 
 export interface TaskData {
-   taskId: number;
+   taskId: string;
    title: string;
    description: string;
    deadline: string;
 }
 
 export interface TaskList {
-   taskListId: number;
+   taskListId: string;
    projectId: string;
    title: string;
    tasks: TaskData[];
 }
 
 export type PendingMove = {
-   sourceListId: number;
-   targetListId: number;
-   taskId: number;
+   sourceListId: string;
+   targetListId: string;
+   taskId: string;
    targetIndex?: number;
 };
 
-export type TaskListsState = Record<number, TaskList>;
+export type TaskListsState = Record<string, TaskList>;
 
 export interface userPayload {
   userName: string;

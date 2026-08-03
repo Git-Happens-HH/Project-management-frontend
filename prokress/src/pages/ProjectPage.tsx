@@ -16,8 +16,8 @@ import type { PendingMove, TaskListsState, TaskData } from "../helper/types.ts";
 import { API_URL } from "../config";
 import "../App.css";
 
-const taskDndId = (taskId: number) => `task-${taskId}`;
-const listDndId = (taskListId: number) => `list-${taskListId}`;
+const taskDndId = (taskId: string) => `task-${taskId}`;
+const listDndId = (taskListId: string) => `list-${taskListId}`;
 
 const collisionDetection: CollisionDetection = (args) => {
    const pointerCollisions = pointerWithin(args);
@@ -37,11 +37,11 @@ function ProjectPage() {
    const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState<boolean>(false);
    const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
-   const [taskListId, setTaskListId] = useState<number>(0);
+   const [taskListId, setTaskListId] = useState<string>("");
    const [activeTask, setActiveTask] = useState<TaskData | null>(null);
    const projectId: string | undefined = id;
 
-   const handleEditClick = async (taskId: number, listId: number) => {
+   const handleEditClick = async (taskId: string, listId: string) => {
       setTaskListId(listId);
       const token = localStorage.getItem("token");
       const task = await getTaskData(token, projectId, listId, taskId);
@@ -58,7 +58,7 @@ function ProjectPage() {
    const [contextMenuMode, setContextMenuMode] = useState<"project" | "task" | null>(null);
    const [contextMenuId, setContextMenuId] = useState<number>(0);
    const [pos, setPos] = useState({ x: 0, y: 0 });
-   const dragSourceListId = useRef<number | null>(null);
+   const dragSourceListId = useRef<string | null>(null);
    const pendingMoveRef = useRef<PendingMove | null>(null);
    // end of context menu block
 
@@ -83,7 +83,7 @@ function ProjectPage() {
       }
    };
 
-   const deleteTaskList = (taskListId: number) => {
+   const deleteTaskList = (taskListId: string) => {
       const token = localStorage.getItem("token");
       if (token && id) {
          if (confirm("Do you really want to delete!")) {
