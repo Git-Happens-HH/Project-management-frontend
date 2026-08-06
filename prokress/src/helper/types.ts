@@ -47,3 +47,13 @@ export interface userPayload {
   passwordHash: string;
 }
 
+export type AppUserSummary = {
+   appUserId: number;
+   username: string;
+   email: string;
+};
+
+export type ProjectMember = {
+   appUser: AppUserSummary;
+   role: "owner" | "member";
+};

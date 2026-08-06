@@ -1,5 +1,5 @@
 import { decodeToken, isExpired } from "react-jwt";
-import type { projectType, TaskData, TaskListsState, userPayload } from "./types";
+import type { AppUserSummary, projectType, TaskData, TaskListsState, userPayload } from "./types";
 import { API_URL } from "../config";
 const url: string = API_URL;
 
@@ -423,3 +423,34 @@ export async function reorderTaskOrder(
    }
 }
 
+//Search users by username
+export async function searchUsers(query: string): Promise<AppUserSummary[]> {
+   const token = localStorage.getItem("token");
+   const response = await fetch(`${url}/api/users/search?query=${encodeURIComponent(query)}`, {
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
+      },
+   });
+   if (!response.ok) {
+      throw new Error("Error occured searching users");
+   }
+   return await response.json();
+}
+
+//add member to project
+export async function addMemberToProject(projectId: string, userId: string): Promise<Response> {
+   const token = localStorage.getItem("token");
+   const response = await fetch(`${url}/api/projects/${projectId}/members/${userId}`, {
+      method: "POST",
+      headers: {
+         "Content-Type": "Application/json",
+         Authorization: `Bearer ${token}`
+      },
+   });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`Error adding member: ${response.status} ${body}`);
+   }
+   return response;
+}
