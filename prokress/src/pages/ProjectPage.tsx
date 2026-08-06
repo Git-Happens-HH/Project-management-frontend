@@ -227,7 +227,7 @@ function ProjectPage() {
                   );
 
                   return (
-                     <TaskList
+<div className="relative">                     <TaskList
                         key={taskList.taskListId}
                         id={listDndId(taskList.taskListId)}
                         taskListTitle={taskList.title}
@@ -257,7 +257,7 @@ function ProjectPage() {
                               />
                            ))}
                         </SortableContext>
-                        <div className="absolute top-[88%] flex flex-row gap-2">
+                        <div className="absolute top-[93%] flex flex-row gap-2">
                            <div
                               onClick={() => {deleteTaskList(taskList.taskListId);}}
                               className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500 z-10"
@@ -279,6 +279,7 @@ function ProjectPage() {
                            </div>
                         </div>
                      </TaskList>
+</div>
                   );
                })}
             </div>

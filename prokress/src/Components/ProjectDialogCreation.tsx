@@ -26,6 +26,7 @@ const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog }) => {
         } catch (err) {
             console.error('Project create failed', err)
         }
+
     }
 
     return (

@@ -68,12 +68,12 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
           <ul>
             <li
               onClick={() => deleteProjectById(props.contextMenuId.toString())}
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Delete Project
             </li>
 
-            <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center">
+            <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black">
               Edit
             </li>
           </ul>
@@ -89,7 +89,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
                   props.contextMenuId,
                 )
               }
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Delete Task
             </li>
@@ -97,7 +97,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
             <li
               // contextMenuId == taskID
               onClick={() => props.onEditTask(props.contextMenuId, props.taskListId)}
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Edit
             </li>

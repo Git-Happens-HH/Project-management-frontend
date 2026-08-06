@@ -7,24 +7,30 @@ const url: string = API_URL;
 export async function registerHandler(
    data: userPayload
 ): Promise<string> {
-   const response = await fetch(`${url}/register`, {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
+   try {
+      const response = await fetch(`${url}/register`, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+            username: data.userName.trim(),
+            firstName: data.firstName.trim(),
+            lastName: data.lastName.trim(),
+            email: data.email.trim(),
+            passwordHash: data.passwordHash.trim(),
+         }),
       },
-      body: JSON.stringify({
-         username: data.userName.trim(),
-         firstName: data.firstName.trim(),
-         lastName: data.lastName.trim(),
-         email: data.email.trim(),
-         passwordHash: data.passwordHash.trim(),
-      }),
-   },
-   );
-   if (!response.ok) {
-      throw new Error("Error occured while creating user");
+      );
+      if (!response.ok) {
+         throw new Error("Error occured while creating user");
+      }
+      return response.text();
+
+   } catch (error) {
+      console.error("Error fetching token: ", error);
+      throw error;
    }
-   return await response.text();
 }
 
 // Funtion for getting all users.
@@ -44,7 +50,7 @@ export async function loginHandler(
          }),
       });
       if (!response.ok) {
-         throw new Error("Error occured while creating user");
+         throw new Error("Error occured while login-in");
       }
       const tokenData = await response.text();
       return tokenData;
