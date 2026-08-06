@@ -54,6 +54,9 @@ export type AppUserSummary = {
 };
 
 export type ProjectMember = {
-   appUser: AppUserSummary;
+   appUserId: number;
+   username: string;
+   firstNameLastName: string;
+   email: string;
    role: "owner" | "member";
 };

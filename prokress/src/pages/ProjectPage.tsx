@@ -2,7 +2,7 @@ import TaskList from "../Components/TaskList.tsx";
 import Task from "../Components/Task.tsx";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { createNewTasklist, deleteTasklist, getTaskData, transformTaskLists } from "../helper/handler.tsx";
+import { createNewTasklist, deleteTasklist, getProjectMembers, getTaskData, transformTaskLists } from "../helper/handler.tsx";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import type { IMessage, StompSubscription } from "@stomp/stompjs";
@@ -12,12 +12,37 @@ import TaskDialog from "../Components/TaskDialog.tsx";
 import ContextMenu from "../Components/ContextMenu.tsx";
 import EditTaskDialog from "../Components/TaskEditDialog.tsx";
 import { createDragHandlers, moveTaskInState } from "../helper/dndHandlers.ts";
-import type { PendingMove, TaskListsState, TaskData } from "../helper/types.ts";
+import type { PendingMove, TaskListsState, TaskData, ProjectMember } from "../helper/types.ts";
 import { API_URL } from "../config";
 import "../App.css";
 
 const taskDndId = (taskId: number) => `task-${taskId}`;
 const listDndId = (taskListId: number) => `list-${taskListId}`;
+
+
+// Dopdown functionalities for seeing project members and adding new members
+
+function toggleDropdown() {
+      const menu = document.getElementById("memberListDropdown");
+
+      if (!menu) return;
+
+      menu.classList.toggle("hidden");
+}
+
+   // Close when clicking outside
+   window.addEventListener("click", (e: MouseEvent): void => {
+      const menu = document.getElementById("memberListDropdown");
+      const button = (e.target as HTMLElement | null)?.closest("button");
+    
+      if (!menu) return;
+    
+      if (!button && !menu.contains(e.target as Node)) {
+        menu.classList.add("hidden");
+      }
+   });
+
+   
 
 const collisionDetection: CollisionDetection = (args) => {
    const pointerCollisions = pointerWithin(args);
@@ -40,6 +65,8 @@ function ProjectPage() {
    const [taskListId, setTaskListId] = useState<number>(0);
    const [activeTask, setActiveTask] = useState<TaskData | null>(null);
    const projectId: string | undefined = id;
+
+   const [memberList, setMemberList] = useState<ProjectMember[]>([])
 
    const handleEditClick = async (taskId: number, listId: number) => {
       setTaskListId(listId);
@@ -86,7 +113,7 @@ function ProjectPage() {
    const deleteTaskList = (taskListId: number) => {
       const token = localStorage.getItem("token");
       if (token && id) {
-         if (confirm("Do you really want to delete!")) {
+         if (confirm("Do you really want to delete this tasklist?")) {
             deleteTasklist(token, id, taskListId);
          }
       }
@@ -134,6 +161,8 @@ function ProjectPage() {
       } else if (stompClient.current.connected) {
          subscribeToProject(projectId);
       }
+
+      setMemberList(await getProjectMembers(projectId));
    };
 
    function subscribeToProject(projectId: string) {
@@ -186,7 +215,7 @@ function ProjectPage() {
                      xmlns="http://www.w3.org/2000/svg"
                      height="24px"
                      viewBox="0 -960 960 960"
-                     width="24px"
+                     width="29px"
                      fill="#e3e3e3"
                   >
                      <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
@@ -199,7 +228,8 @@ function ProjectPage() {
                   Add
                </button>
             </div>
-            <button className="border-2 rounded-full w-14 h-14 px-3">
+            <button onClick={toggleDropdown} className="border-2 rounded-full w-14 h-14 px-3">
+               {/* member list button */}
                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="24px"
@@ -210,6 +240,28 @@ function ProjectPage() {
                   <path d="M40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm720 0v-120q0-44-24.5-84.5T666-434q51 6 96 20.5t84 35.5q36 20 55 44.5t19 53.5v120H760ZM247-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47Zm466 0q-47 47-113 47-11 0-28-2.5t-28-5.5q27-32 41.5-71t14.5-81q0-42-14.5-81T544-792q14-5 28-6.5t28-1.5q66 0 113 47t47 113q0 66-47 113ZM120-240h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q440-607 440-640t-23.5-56.5Q393-720 360-720t-56.5 23.5Q280-673 280-640t23.5 56.5Q327-560 360-560t56.5-23.5ZM360-240Zm0-400Z" />
                </svg>
             </button>
+            <div
+               id="memberListDropdown"
+               className="hidden absolute right-11 mt-2 w-40 rounded-lg shadow-lg bg-(--prokress-beige-100)"
+               >
+                  <ul role="list" className="divide-y divide-white/5">
+                  {memberList.map((member) => (
+                     <li key={member.appUserId}className="flex justify-between gap-x-6 py-5">
+                        <div className="flex min-w-0 gap-x-4">
+                           <div className="min-w-0 flex-auto">
+                           <p className="text-sm/6 font-semibold text-white"> {member.firstNameLastName} </p>
+                           <p className="mt-1 truncate text-xs/5 text-gray-400"> {member.email} </p>
+                           </div>
+                        </div>
+                        <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                           <p className="text-sm/6 text-white"> {member.role} </p>
+                        </div>
+                     </li>
+                  
+                  )) }
+                     </ul>
+                  </div>
+            
          </div>
          <DndContext
             collisionDetection={collisionDetection}
@@ -337,6 +389,8 @@ function ProjectPage() {
                contextMenuId={contextMenuId}
             />
          )}
+         
+         
       </div>
    );
 }

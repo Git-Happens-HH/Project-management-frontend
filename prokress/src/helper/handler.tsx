@@ -1,5 +1,5 @@
 import { decodeToken, isExpired } from "react-jwt";
-import type { AppUserSummary, projectType, TaskData, TaskListsState, userPayload } from "./types";
+import type { AppUserSummary, ProjectMember, projectType, TaskData, TaskListsState, userPayload } from "./types";
 import { API_URL } from "../config";
 const url: string = API_URL;
 
@@ -451,6 +451,38 @@ export async function addMemberToProject(projectId: string, userId: string): Pro
     if (!response.ok) {
       const body = await response.text().catch(() => "");
       throw new Error(`Error adding member: ${response.status} ${body}`);
+   }
+   return response;
+}
+
+//get current members of project
+export async function getProjectMembers(projectId: string): Promise<ProjectMember[]> {
+   const token = localStorage.getItem("token");
+   const response = await fetch(`${url}/api/projects/${projectId}/members`, {
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
+      },
+   });
+   if (!response.ok) {
+      throw new Error("Error occured fetching members");
+   }
+   return await response.json();
+}
+
+//delete a member from a project
+export async function removeMemberFromProject(projectId: string, userId: number): Promise<Response> {
+   const token = localStorage.getItem("token");
+   const response = await fetch(`${url}/api/projects/${projectId}/members/${userId}`, {
+      method: "DELETE",
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
+      },
+   });
+   if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`Error removing member: ${response.status} ${body}`);
    }
    return response;
 }
