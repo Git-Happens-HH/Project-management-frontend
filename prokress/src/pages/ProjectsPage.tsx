@@ -94,7 +94,7 @@ function ProjectsPage() {
          </div>
          <ProjectDialogCreation
             isOpen={isProjectDialogOpen}
-            toggleDialog={() => setProjectDialogOpen(false)}
+            toggleDialog={() => {setProjectDialogOpen(false), fetchProjects()}}
          />
          {
             contextMenuMode && (

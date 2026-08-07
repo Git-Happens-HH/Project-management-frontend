@@ -21,7 +21,7 @@ const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog }) => {
         try {
             //onCreate({ ...form, name: form.name.trim() })
             //console.log(form)
-            createNewProject(form.name, form.description ?? "")
+            await createNewProject(form.name, form.description ?? "")
             toggleDialog()
         } catch (err) {
             console.error('Project create failed', err)

@@ -62,7 +62,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
       <div
         onClick={(e) => e.stopPropagation()}
         className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100)"
-        style={{ left: props.positions.x, top: props.positions.y - 90 }}
+        style={{ left: props.positions.x, top: props.positions.y -90 }}
       >
         {isProject && (
           <ul>
