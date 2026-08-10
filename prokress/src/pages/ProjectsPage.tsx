@@ -1,5 +1,6 @@
 import ProjectCard from '../Components/ProjectCard.tsx'
 import ProjectDialogCreation from '../Components/ProjectDialogCreation'
+import ProjectEditDialog from '../Components/ProjectEditDialog.tsx'
 import { useState, useEffect } from 'react'
 import { getProjectsForUser } from '../helper/handler.tsx'
 import type { projectType } from '../helper/types.ts'
@@ -15,6 +16,8 @@ function ProjectsPage() {
    const [myProjects, setMyProjects] = useState<projectType[]>([]);
    const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
    const [isProjectDialogOpen, setProjectDialogOpen] = useState(false)
+   const [isEditProjectDialogOpen, setEditProjectDialogOpen] = useState(false)
+   const [selectedProject, setSelectedProject] = useState<projectType | null>(null)
    const appUserId = localStorage.getItem('token')
    const fetchProjects = async (): Promise<void> => {
       try {
@@ -42,6 +45,23 @@ function ProjectsPage() {
    useEffect(() => {
       fetchProjects();
    }, []);
+
+   const openEditProjectDialog = (projectId: number) => {
+      const foundProject = [...myProjects, ...sharedProjects].find((project) => Number(project.projectId) === projectId);
+
+      if (!foundProject) {
+         return;
+      }
+
+      setSelectedProject(foundProject);
+      setContextMenuMode(null);
+      setEditProjectDialogOpen(true);
+   };
+
+   const closeEditProjectDialog = () => {
+      setEditProjectDialogOpen(false);
+      setSelectedProject(null);
+   };
 
    return (
       <div className="flex flex-col min-h-screen items-center bg-(--prokress-beige-100)">
@@ -96,6 +116,12 @@ function ProjectsPage() {
             isOpen={isProjectDialogOpen}
             toggleDialog={() => {setProjectDialogOpen(false), fetchProjects()}}
          />
+         <ProjectEditDialog
+            isOpen={isEditProjectDialogOpen}
+            toggleDialog={closeEditProjectDialog}
+            project={selectedProject}
+            onSaved={fetchProjects}
+         />
          {
             contextMenuMode && (
                <ContextMenu
@@ -106,6 +132,7 @@ function ProjectsPage() {
                   taskListId={0}
                   projectId={""}
                   positions={pos}
+                  onEditProject={openEditProjectDialog}
                   onEditTask={() => { }} />
             )
          }
