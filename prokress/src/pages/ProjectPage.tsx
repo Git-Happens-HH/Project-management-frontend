@@ -43,10 +43,18 @@ function ProjectPage() {
 
    const handleEditClick = async (taskId: number, listId: number) => {
       setTaskListId(listId);
-      const token = localStorage.getItem("token");
-      const task = await getTaskData(token, projectId, listId, taskId);
-      setSelectedTask(task);
+      setContextMenuMode(null);
       setIsEditTaskDialogOpen(true);
+      setSelectedTask(null);
+
+      try {
+         const token = localStorage.getItem("token");
+         const task = await getTaskData(token, projectId, listId, taskId);
+         setSelectedTask(task);
+      } catch (error) {
+         console.error("Failed to load task for editing:", error);
+         setIsEditTaskDialogOpen(false);
+      }
    };
 
    const closeEditDialog = () => {
