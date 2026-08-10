@@ -291,7 +291,7 @@ function ProjectPage() {
                   );
                })}
             </div>
-            <DragOverlay>
+               <DragOverlay>
                {activeTask && (
                   <div className="flex flex-col rounded w-[330px] h-32 p-2 border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) shadow-2xl opacity-95 overflow-hidden">
                      <div className="flex pb-1">

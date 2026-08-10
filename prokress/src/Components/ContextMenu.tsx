@@ -68,7 +68,9 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
         {isProject && (
           <ul>
             <li
-              onClick={() => deleteProjectById(props.contextMenuId.toString())}
+              onClick={() => {
+                  deleteProjectById(props.contextMenuId.toString());
+               }}
               className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Delete Project

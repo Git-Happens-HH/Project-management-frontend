@@ -487,6 +487,7 @@ export async function deleteProject(
       if (!response.ok) {
          throw new Error(`Error: ${response.statusText}`);
       }
+      window.location.reload();
       return response;
    } catch (error) {
       console.error("Failed to delete project", error);
