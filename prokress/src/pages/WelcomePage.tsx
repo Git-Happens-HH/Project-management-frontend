@@ -20,7 +20,7 @@ function WelcomePage() {
                     className="w-38 bg-(--prokress-violet) hover:bg-(--prokress-orange) text-white font-bold py-2 px-4 rounded"
                     onClick={() => setDialogMode("register")}
                 >
-                    Sign-up
+                    Register
                 </button>
             </div>
 
