@@ -9,6 +9,7 @@ interface BaseContextMenu {
 type ProjectMode = BaseContextMenu & {
   mode: "project";
   contextMenuId: number;
+  onEditProject?: (projectId: number) => void;
 };
 
 type TaskMode = BaseContextMenu & {
@@ -73,7 +74,13 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
               Delete Project
             </li>
 
-            <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black">
+            <li
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onEditProject?.(props.contextMenuId);
+              }}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
+            >
               Edit
             </li>
           </ul>
@@ -96,7 +103,10 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
 
             <li
               // contextMenuId == taskID
-              onClick={() => props.onEditTask(props.contextMenuId, props.taskListId)}
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onEditTask(props.contextMenuId, props.taskListId);
+              }}
               className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Edit
