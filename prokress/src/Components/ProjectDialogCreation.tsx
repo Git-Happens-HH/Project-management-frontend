@@ -1,5 +1,5 @@
 import React, { useState, type SubmitEvent } from 'react'
-import {createNewProject} from '../helper/handler.tsx'
+import { createNewProject } from '../helper/handler.tsx'
 
 interface ProjectPayload {
     name: string
@@ -9,18 +9,19 @@ interface ProjectPayload {
 interface Props {
     isOpen: boolean
     toggleDialog: () => void
-    //onCreate: (payload: ProjectPayload) => Promise<void> | void
 }
 
-const ProjectDialogCreation: React.FC<Props> = ({ isOpen, toggleDialog }) => {
+const ProjectDialogCreation: React.FC<Props> = ({
+    isOpen,
+    toggleDialog,
+}) => {
     const [form, setForm] = useState<ProjectPayload>({ name: "", description: "" })
+
     if (!isOpen) return null
 
     const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault()
         try {
-            //onCreate({ ...form, name: form.name.trim() })
-            //console.log(form)
             await createNewProject(form.name, form.description ?? "")
             toggleDialog()
         } catch (err) {

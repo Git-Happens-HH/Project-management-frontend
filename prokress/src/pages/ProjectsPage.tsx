@@ -1,5 +1,6 @@
 import ProjectCard from '../Components/ProjectCard.tsx'
 import ProjectDialogCreation from '../Components/ProjectDialogCreation'
+import ProjectEditDialog from '../Components/ProjectEditDialog.tsx'
 import { useState, useEffect } from 'react'
 import { getProjectsForUser } from '../helper/handler.tsx'
 import type { projectType } from '../helper/types.ts'
@@ -15,6 +16,9 @@ function ProjectsPage() {
    const [myProjects, setMyProjects] = useState<projectType[]>([]);
    const [sharedProjects, setSharedProjects] = useState<projectType[]>([]);
    const [isProjectDialogOpen, setProjectDialogOpen] = useState(false)
+   const [isEditProjectDialogOpen, setEditProjectDialogOpen] = useState(false)
+   const [selectedProject, setSelectedProject] = useState<projectType | null>(null)
+   const [contextMenuProject, setContextMenuProject] = useState<projectType | null>(null)
    const appUserId = localStorage.getItem('token')
    const fetchProjects = async (): Promise<void> => {
       try {
@@ -43,6 +47,21 @@ function ProjectsPage() {
       fetchProjects();
    }, []);
 
+   const openEditProjectDialog = () => {
+      if (!contextMenuProject) {
+         return
+      }
+
+      setSelectedProject(contextMenuProject)
+      setContextMenuMode(null)
+      setEditProjectDialogOpen(true)
+   }
+
+   const closeEditProjectDialog = () => {
+      setEditProjectDialogOpen(false)
+      setSelectedProject(null)
+   }
+
    return (
       <div className="flex flex-col min-h-screen items-center bg-(--prokress-beige-100)">
          <div className="w-90 md:w-2xl xl:w-7xl rounded-3xl mt-[5%] h-80 bg-(--prokress-beige-50) shadow-md">
@@ -56,6 +75,7 @@ function ProjectsPage() {
                            e.preventDefault();
                            setContextMenuMode("project");
                            setContextMenuId(parseInt(e.currentTarget.id));
+                           setContextMenuProject(project);
                            setPos({ x: e.pageX, y: e.pageY });
                         }}>
                         <ProjectCard project={project} index={index} />
@@ -79,6 +99,7 @@ function ProjectsPage() {
                            e.preventDefault();
                            setContextMenuMode("project");
                            setContextMenuId(parseInt(e.currentTarget.id));
+                           setContextMenuProject(project);
                            setPos({ x: e.pageX, y: e.pageY });
                         }}>
                         <ProjectCard project={project} index={index} />
@@ -96,6 +117,12 @@ function ProjectsPage() {
             isOpen={isProjectDialogOpen}
             toggleDialog={() => {setProjectDialogOpen(false), fetchProjects()}}
          />
+         <ProjectEditDialog
+            isOpen={isEditProjectDialogOpen}
+            project={selectedProject}
+            toggleDialog={closeEditProjectDialog}
+            onSaved={fetchProjects}
+         />
          {
             contextMenuMode && (
                <ContextMenu
@@ -106,6 +133,7 @@ function ProjectsPage() {
                   taskListId={0}
                   projectId={""}
                   positions={pos}
+                  onEditProject={openEditProjectDialog}
                   onEditTask={() => { }} />
             )
          }

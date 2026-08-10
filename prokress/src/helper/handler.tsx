@@ -202,6 +202,38 @@ export async function createNewProject(
    }
 }
 
+export async function updateProject(
+   projectId: string,
+   projectTitle: string,
+   description: string,
+): Promise<Response> {
+   try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${url}/api/projects/${projectId}`, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer: ${token}`,
+         },
+         body: JSON.stringify({
+            title: projectTitle.trim(),
+            description: description.trim(),
+         }),
+      });
+      if (!response.ok) {
+         const body = await response.text().catch(() => "");
+         throw new Error(
+            `Error occured updating project: ${response.status} ${response.statusText} ${body}`,
+         );
+      }
+      const jsonData = await response.json();
+      return jsonData;
+   } catch (error: unknown) {
+      console.error("Error updating project: ", error);
+      throw error;
+   }
+}
+
 export async function deleteProject(
    token: string,
    projectId: string,
