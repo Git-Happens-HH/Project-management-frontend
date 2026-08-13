@@ -17,7 +17,7 @@ function Task({ index, title, description, onContextMenu, id, taskId, listId }: 
    const [isCollapsed, setIsCollapsed] = useState(index >= 4);
    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id,
-      data: { type: 'task', taskId, listId, index },
+      data: { type: 'task', taskId, listId, index, title, description },
    });
 
    const toggleCollapse = () => {
