@@ -235,65 +235,66 @@ function ProjectPage() {
                   );
 
                   return (
-<div className="relative">                     <TaskList
-                        key={taskList.taskListId}
-                        id={listDndId(taskList.taskListId)}
-                        taskListTitle={taskList.title}
-                        taskCount={uniqueTasks.length}
-                     >
-                        <SortableContext
-                           items={uniqueTasks.map((task) => taskDndId(task.taskId))}
-                           strategy={verticalListSortingStrategy}
+                     <div className="relative">
+                        <TaskList
+                           key={taskList.taskListId}
+                           id={listDndId(taskList.taskListId)}
+                           taskListTitle={taskList.title}
+                           taskCount={uniqueTasks.length}
                         >
-                           {uniqueTasks.map((task, index) => (
-                              <Task
-                                 key={task.taskId}
-                                 id={taskDndId(task.taskId)}
-                                 taskId={task.taskId}
-                                 listId={taskList.taskListId}
-                                 index={index}
-                                 column={taskList.taskListId}
-                                 title={task.title}
-                                 description={task.description}
-                                 onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    setContextMenuMode("task");
-                                    setContextMenuId(task.taskId);
+                           <SortableContext
+                              items={uniqueTasks.map((task) => taskDndId(task.taskId))}
+                              strategy={verticalListSortingStrategy}
+                           >
+                              {uniqueTasks.map((task, index) => (
+                                 <Task
+                                    key={task.taskId}
+                                    id={taskDndId(task.taskId)}
+                                    taskId={task.taskId}
+                                    listId={taskList.taskListId}
+                                    index={index}
+                                    column={taskList.taskListId}
+                                    title={task.title}
+                                    description={task.description}
+                                    onContextMenu={(e) => {
+                                       e.preventDefault();
+                                       setContextMenuMode("task");
+                                       setContextMenuId(task.taskId);
+                                       setTaskListId(taskList.taskListId);
+                                       setPos({ x: e.pageX, y: e.pageY });
+                                    }}
+                                 />
+                              ))}
+                           </SortableContext>
+                           <div className="absolute top-[93%] flex flex-row gap-2">
+                              <div
+                                 onClick={() => { deleteTaskList(taskList.taskListId); }}
+                                 className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500 z-10"
+                              >
+                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3" >
+                                    <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
+                                 </svg>
+                              </div>
+                              <div
+                                 onClick={() => {
+                                    setIsDialogOpen(true);
                                     setTaskListId(taskList.taskListId);
-                                    setPos({ x: e.pageX, y: e.pageY });
                                  }}
-                              />
-                           ))}
-                        </SortableContext>
-                        <div className="absolute top-[93%] flex flex-row gap-2">
-                           <div
-                              onClick={() => {deleteTaskList(taskList.taskListId);}}
-                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-red-500 z-10"
-                           >
-                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3" >
-                                 <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
-                              </svg>
+                                 className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange) z-10"
+                              >
+                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff" >
+                                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                                 </svg>
+                              </div>
                            </div>
-                           <div
-                              onClick={() => {
-                                 setIsDialogOpen(true);
-                                 setTaskListId(taskList.taskListId);
-                              }}
-                              className=" text-white font-bold py-2 px-2 rounded-full w-10 h-10 bg-(--prokress-black-500) hover:bg-(--prokress-orange) z-10"
-                           >
-                              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fff" >
-                                 <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
-                              </svg>
-                           </div>
-                        </div>
-                     </TaskList>
-</div>
+                        </TaskList>
+                     </div>
                   );
                })}
             </div>
-               <DragOverlay>
-               {activeTask && (
-                  <div className="flex flex-col rounded w-[330px] h-32 p-2 border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) shadow-2xl opacity-95 overflow-hidden">
+            <DragOverlay>
+               {activeTask &&(
+                  <div className="flex flex-col rounded w-[330px] h-32 p-2 border-solid border-black border-2 text-(--prokress-black-700) my-2 bg-(--prokress-beige-0) shadow-2xl opacity-45 overflow-hidden">
                      <div className="flex pb-1">
                         <p className="w-9/10 text-md">{activeTask.title}</p>
                         <button
