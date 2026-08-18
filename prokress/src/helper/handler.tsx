@@ -7,24 +7,30 @@ const url: string = API_URL;
 export async function registerHandler(
    data: userPayload
 ): Promise<string> {
-   const response = await fetch(`${url}/register`, {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
+   try {
+      const response = await fetch(`${url}/register`, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+            username: data.userName.trim(),
+            firstName: data.firstName.trim(),
+            lastName: data.lastName.trim(),
+            email: data.email.trim(),
+            passwordHash: data.passwordHash.trim(),
+         }),
       },
-      body: JSON.stringify({
-         username: data.userName.trim(),
-         firstName: data.firstName.trim(),
-         lastName: data.lastName.trim(),
-         email: data.email.trim(),
-         passwordHash: data.passwordHash.trim(),
-      }),
-   },
-   );
-   if (!response.ok) {
-      throw new Error("Error occured while creating user");
+      );
+      if (!response.ok) {
+         throw new Error("Error occured while creating user");
+      }
+      return response.text();
+
+   } catch (error) {
+      console.error("Error fetching token: ", error);
+      throw error;
    }
-   return await response.text();
 }
 
 // Funtion for getting all users.
@@ -44,7 +50,7 @@ export async function loginHandler(
          }),
       });
       if (!response.ok) {
-         throw new Error("Error occured while creating user");
+         throw new Error("Error occured while login-in");
       }
       const tokenData = await response.text();
       return tokenData;
@@ -165,6 +171,7 @@ export async function createNewTasklist(
    }
 }
 
+// CREATE NEW PROJECT
 export async function createNewProject(
    projectTitle: string,
    description: string,
@@ -196,27 +203,6 @@ export async function createNewProject(
    }
 }
 
-export async function deleteProject(
-   token: string,
-   projectId: string,
-): Promise<Response> {
-   try {
-      const response = await fetch(`${url}/api/projects/${projectId}`, {
-         method: "DELETE",
-         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer: ${token}`,
-         },
-      });
-      if (!response.ok) {
-         throw new Error(`Error: ${response.statusText}`);
-      }
-      return response;
-   } catch (error) {
-      console.error("Failed to delete project", error);
-      throw new Error(`Error while deleting`);
-   }
-}
 
 // function to delete tasklist
 export async function deleteTasklist(
@@ -279,6 +265,8 @@ export async function createNewTask(
    }
 }
 
+// DELETE TASK
+
 export async function deleteTask(
    token: string,
    projectId: string,
@@ -331,6 +319,7 @@ export async function getTaskData(
 }
 
 //  EDIT TASK helper
+
 export async function editTask(
    projectId: string | undefined,
    taskListId: number,
@@ -367,6 +356,7 @@ export async function editTask(
       throw error;
    }
 }
+// MOVE TASK TO ANOTHER TASKLIST
 
 export async function moveHandler(projectId: string, taskListId: number, taskId: number, newTaskListId: number): Promise<Response> {
    try {
@@ -391,6 +381,8 @@ export async function moveHandler(projectId: string, taskListId: number, taskId:
       throw error;
    }
 }
+
+// REORDER TASK ORDER
 
 export async function reorderTaskOrder(
    projectId: string,
@@ -503,3 +495,83 @@ export async function promoteUserToOwner(projectId: string, userId: number): Pro
    }
    return response;
 }
+// GET PROJECT DATA (BY ID)
+
+export async function getProjectData(
+   token: string | null,
+   projectId: string | undefined
+): Promise<projectType> {
+   const response = await fetch(`${url}/api/projects/${projectId}`, {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer: ${token}`,
+      },
+   });
+
+   if (!response.ok) {
+      throw new Error("Failed to fetch project");
+   }
+
+   return await response.json();
+}
+
+// EDIT PROJECT HELPER
+
+export async function editProject(
+   token: string | null,
+   projectId: string,
+   projectTitle: string,
+   description: string,
+): Promise<projectType> {
+   try {
+      const response = await fetch(`${url}/api/projects/${projectId}`, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer: ${token}`,
+         },
+         body: JSON.stringify({
+            title: projectTitle.trim(),
+            description: description.trim(),
+         }),
+      });
+
+      if (!response.ok) {
+         const body = await response.text().catch(() => "");
+         throw new Error(
+            `Error occured editing project: ${response.status} ${response.statusText} ${body}`,
+         );
+      }
+
+      return await response.json();
+   } catch (error: unknown) {
+      console.error("Error editing project: ", error);
+      throw error;
+   }
+}
+
+// DELETE PROJECT
+export async function deleteProject(
+   token: string,
+   projectId: string,
+): Promise<Response> {
+   try {
+      const response = await fetch(`${url}/api/projects/${projectId}`, {
+         method: "DELETE",
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer: ${token}`,
+         },
+      });
+      if (!response.ok) {
+         throw new Error(`Error: ${response.statusText}`);
+      }
+      window.location.reload();
+      return response;
+   } catch (error) {
+      console.error("Failed to delete project", error);
+      throw new Error(`Error while deleting`);
+   }
+}
+
