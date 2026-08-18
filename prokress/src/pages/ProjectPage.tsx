@@ -37,6 +37,7 @@ import type {
 import { API_URL } from "../config";
 import "../App.css";
 import AddMemberDialog from "../Components/AddMemberDialog.tsx";
+import { Menu, Button } from "@material-tailwind/react";
 
 const taskDndId = (taskId: number) => `task-${taskId}`;
 const listDndId = (taskListId: number) => `list-${taskListId}`;
@@ -81,7 +82,7 @@ function ProjectPage() {
    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
    const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] =
       useState<boolean>(false);
-      const [isAddMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
+   const [isAddMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
    const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
    const [taskListId, setTaskListId] = useState<number>(0);
@@ -149,16 +150,16 @@ function ProjectPage() {
    const deleteMember = async (member: ProjectMember) => {
       const token = localStorage.getItem("token");
       if (!token || !id) return;
-   
+
       const username = `${member.username ?? ""}`;
-   
+
       if (!confirm(`Do you really want to remove ${username} from the project?`)) return;
-   
+
       try {
          await removeMemberFromProject(id, member.appUserId);
          const updatedMembers = await getProjectMembers(id);
          setMemberList(updatedMembers);
-      } catch(error) {
+      } catch (error) {
          alert("Could not remove member from project")
       }
    }
@@ -170,8 +171,8 @@ function ProjectPage() {
    const openProject = async (projectId: string) => {
 
       const token = localStorage.getItem("token");
-      
-// TEMPORARY PLEASE DELETE!!!
+
+      // TEMPORARY PLEASE DELETE!!!
       console.log("token:", token);
 
 
@@ -207,19 +208,19 @@ function ProjectPage() {
          subscribeToProject(projectId);
       }
 
-const members = await getProjectMembers(projectId);
-setMemberList(members);
+      const members = await getProjectMembers(projectId);
+      setMemberList(members);
 
-if (!token) return;
+      if (!token) return;
 
-const payload = JSON.parse(atob(token.split(".")[1]));
-const currentUserEmail = payload.sub;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const currentUserEmail = payload.sub;
 
-const currentMember = members.find(
-  (member) => member.email === currentUserEmail
-);
+      const currentMember = members.find(
+         (member) => member.email === currentUserEmail
+      );
 
-setCurrUserRole(currentMember?.role ?? null);
+      setCurrUserRole(currentMember?.role ?? null);
    };
 
    function subscribeToProject(projectId: string) {
@@ -286,7 +287,7 @@ setCurrUserRole(currentMember?.role ?? null);
                </button>
             </div>
             <div>
-              
+
             </div>
             <div className="relative">
                <button
@@ -312,13 +313,13 @@ setCurrUserRole(currentMember?.role ?? null);
                      <p className="text-sm font-semibold text-(--prokress-black-700)">
                         Project members
                      </p>
-                      <button onClick={() => setAddMemberDialogOpen(true)}>Add member</button>
+                     <button onClick={() => setAddMemberDialogOpen(true)}>Add member</button>
                      <p className="text-xs text-slate-500">
                         {memberList.length} member(s)
                      </p>
                   </div>
                   <ul role="list" className="divide-y divide-slate-200/70">
-                     {memberList.map((member) =>  {
+                     {memberList.map((member) => {
                         const canDeleteMember =
                            currUserRole === "owner" && member.role !== "owner";
 
@@ -348,21 +349,26 @@ setCurrUserRole(currentMember?.role ?? null);
                                  </div>
 
                                  {canDeleteMember && (
-                                    <button
-                                       type="button"
-                                       onClick={() => deleteMember(member)}
-                                       className="ml-auto flex h-8 w-8 items-center justify-center rounded hover:bg-slate-100"
-                                    >
-                                       <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          height="20px"
-                                          viewBox="0 -960 960 960"
-                                          width="24px"
-                                          fill="#1f1f1f"
-                                       >
-                                          <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
-                                       </svg>
-                                    </button>
+                                    <div>
+                                       <Menu>
+                                          <Menu.Trigger className="rounded-full hover:bg-(--prokress-orange) p-1"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"/></svg></Menu.Trigger>
+                                          <Menu.Content className="bg-(--prokress-beige-0) shadow-2xl shadow-black z-50 w-15 p-0.5">
+                                             <Menu.Item className="h-5 justify-center p-4 hover:bg-(--prokress-orange)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#1f1f1f"><path d="M200-160v-80h560v80H200Zm0-140-51-321q-2 0-4.5.5t-4.5.5q-25 0-42.5-17.5T80-680q0-25 17.5-42.5T140-740q25 0 42.5 17.5T200-680q0 7-1.5 13t-3.5 11l125 56 125-171q-11-8-18-21t-7-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820q0 15-7 28t-18 21l125 171 125-56q-2-5-3.5-11t-1.5-13q0-25 17.5-42.5T820-740q25 0 42.5 17.5T880-680q0 25-17.5 42.5T820-620q-2 0-4.5-.5t-4.5-.5l-51 321H200Zm68-80h424l26-167-105 46-133-183-133 183-105-46 26 167Zm212 0Z" /></svg>
+                                             </Menu.Item>
+                                             <Menu.Item className="h-5 justify-center p-4 hover:bg-(--prokress-orange)" onClick={() => deleteMember(member)}><svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                height="30px"
+                                                viewBox="0 -960 960 960"
+                                                width="30px"
+                                                fill="#1f1f1f"
+                                             >
+                                                <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
+                                             </svg>
+                                             </Menu.Item>
+                                          </Menu.Content>
+                                       </Menu>
+                                    </div>
                                  )}
                               </div>
                            </li>
