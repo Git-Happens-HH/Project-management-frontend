@@ -1,40 +1,40 @@
 export type projectType = {
-   projectId: string,
-   title: string,
-   description: string,
-   createdAt: string,
-   role: "owner" | "member"
-}
+  projectId: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  role: "owner" | "member";
+};
 
 export type appUser = {
-    appUserId: string,
-    userName: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    passwordHash: string,
-    registeredAt: Date
-}
+  appUserId: string;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  passwordHash: string;
+  registeredAt: Date;
+};
 
 export interface TaskData {
-   taskId: number;
-   title: string;
-   description: string;
-   deadline: string;
+  taskId: number;
+  title: string;
+  description: string;
+  deadline: string;
 }
 
 export interface TaskList {
-   taskListId: number;
-   projectId: string;
-   title: string;
-   tasks: TaskData[];
+  taskListId: number;
+  projectId: string;
+  title: string;
+  tasks: TaskData[];
 }
 
 export type PendingMove = {
-   sourceListId: number;
-   targetListId: number;
-   taskId: number;
-   targetIndex?: number;
+  sourceListId: number;
+  targetListId: number;
+  taskId: number;
+  targetIndex?: number;
 };
 
 export type TaskListsState = Record<number, TaskList>;
@@ -47,3 +47,17 @@ export interface userPayload {
   passwordHash: string;
 }
 
+export type AppUserSummary = {
+  appUserId: number;
+  username: string;
+  email: string;
+};
+
+export type ProjectMember = {
+  appUserId: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: "owner" | "member";
+};
