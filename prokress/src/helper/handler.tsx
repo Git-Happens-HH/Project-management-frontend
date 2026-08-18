@@ -486,3 +486,20 @@ export async function removeMemberFromProject(projectId: string, userId: number)
    }
    return response;
 }
+
+// promote a project member to owner
+export async function promoteUserToOwner(projectId: string, userId: number): Promise<Response> {
+   const token = localStorage.getItem("token");
+   const response = await fetch(`${url}/api/projects/${projectId}/members/${userId}/promote-to-owner`, {
+      method: "PUT",
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
+      },
+   });
+   if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`Error promoting member: ${response.status} ${body}`);
+   }
+   return response;
+}
