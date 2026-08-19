@@ -9,6 +9,7 @@ interface BaseContextMenu {
 type ProjectMode = BaseContextMenu & {
   mode: "project";
   contextMenuId: number;
+  onEditProject?: (projectId: number) => void;
 };
 
 type TaskMode = BaseContextMenu & {
@@ -62,18 +63,26 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
       <div
         onClick={(e) => e.stopPropagation()}
         className="absolute w-40 h-20 rounded-md bg-(--prokress-beige-100)"
-        style={{ left: props.positions.x, top: props.positions.y - 90 }}
+        style={{ left: props.positions.x, top: props.positions.y -90 }}
       >
         {isProject && (
           <ul>
             <li
-              onClick={() => deleteProjectById(props.contextMenuId.toString())}
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              onClick={() => {
+                  deleteProjectById(props.contextMenuId.toString());
+               }}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Delete Project
             </li>
 
-            <li className="px-4 py-2 hover:bg-(--prokress-orange) text-center">
+            <li
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onEditProject?.(props.contextMenuId);
+              }}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
+            >
               Edit
             </li>
           </ul>
@@ -89,15 +98,18 @@ const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
                   props.contextMenuId,
                 )
               }
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Delete Task
             </li>
 
             <li
               // contextMenuId == taskID
-              onClick={() => props.onEditTask(props.contextMenuId, props.taskListId)}
-              className="px-4 py-2 hover:bg-(--prokress-orange) text-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onEditTask(props.contextMenuId, props.taskListId);
+              }}
+              className="px-4 py-2 hover:bg-(--prokress-orange) text-center text-black"
             >
               Edit
             </li>

@@ -80,8 +80,6 @@ const EditTaskDialog: React.FC<Props> = ({
                         }
                      />
                   </div>
-               </div>
-               <div className="flex flex-col gap-4 p-6">
                   <div className="w-full max-w-sm min-w-50">
                      <label className="block mb-2 text-sm text-slate-600 font-medium">
                         Description
@@ -97,8 +95,6 @@ const EditTaskDialog: React.FC<Props> = ({
                         }
                      />
                   </div>
-               </div>
-               <div className="flex flex-col gap-4 p-6">
                   <div className="w-full max-w-sm min-w-50">
                      <label className="block mb-2 text-sm text-slate-600 font-medium">
                         Deadline

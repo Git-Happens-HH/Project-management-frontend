@@ -118,7 +118,9 @@ export function createDragHandlers({
          targetIndex,
       };
 
-      updateTaskListsFromMove(fromListId, targetListId, taskId, targetIndex);
+      if (fromListId === targetListId) {
+         updateTaskListsFromMove(fromListId, targetListId, taskId, targetIndex);
+      }
    };
 
    const handleDragStart = (event: DragStartEvent) => {
