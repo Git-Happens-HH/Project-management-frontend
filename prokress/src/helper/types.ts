@@ -50,6 +50,8 @@ export interface userPayload {
 export type AppUserSummary = {
   appUserId: number;
   username: string;
+  firstName: string;
+  lastName: string;
   email: string;
 };
 

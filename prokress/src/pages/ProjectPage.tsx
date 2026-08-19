@@ -88,7 +88,7 @@ function ProjectPage() {
 
    const [taskListId, setTaskListId] = useState<number>(0);
    const [activeTask, setActiveTask] = useState<TaskData | null>(null);
-   const projectId: string | undefined = id;
+   const projectId: string | undefined = id; 
 
    const [memberList, setMemberList] = useState<ProjectMember[]>([]);
 
@@ -150,11 +150,35 @@ function ProjectPage() {
    const deleteTaskList = (taskListId: number) => {
       const token = localStorage.getItem("token");
       if (token && id) {
-         if (confirm("Do you really want to delete this tasklist?")) {
+         if (confirm("Are you sure you want to delete this tasklist?")) {
             deleteTasklist(token, id, taskListId);
          }
       }
    };
+
+   const refreshMembers = async () => {
+      if (!id) return;
+
+      try {
+         const members = await getProjectMembers(id);
+         setMemberList(members);
+
+         const token = localStorage.getItem("token");
+         if (!token) return;
+         
+         const payload = JSON.parse(atob(token.split(".")[1]));
+         const currentUserEmail = payload.sub;
+         const currentMember = members.find(
+            (member) => member.email === currentUserEmail,
+         );
+         setCurrUserRole(currentMember?.role ?? null);
+      } catch (error) {
+         console.error("Failed to refresh project members", error);
+      }
+         
+      }
+   
+
 
    const deleteMember = async (member: ProjectMember) => {
       const token = localStorage.getItem("token");
@@ -333,31 +357,53 @@ return (
                className="hidden absolute right-0 z-20 mt-3 min-w-[18rem] max-w-sm rounded-2xl border border-white/20 bg-white/95 shadow-2xl backdrop-blur-lg"
             >
 
-               <div className="px-4 py-3 border-b border-slate-200/70">
-                  <p className="text-sm font-semibold text-(--prokress-black-700)">
-                     Project members
-                  </p>
-                  <button onClick={() => setAddMemberDialogOpen(true)}>Add member</button>
-                  <p className="text-xs text-slate-500">
-                     {memberList.length} member(s)
-                  </p>
-               </div>
-               <ul role="list" className="divide-y divide-slate-200/70">
-                  {memberList.map((member) => {
-                     const canDeleteMember =
-                        currUserRole === "owner" && member.role !== "owner";
+                  <div className="px-4 py-3 border-b border-slate-200/70">
+                     <div className="flex items-center justify-between gap-3">
+                        <div>
+                           <p className="text-sm font-semibold text-(--prokress-black-700)">
+                              Project members
+                           </p>
+                           <p className="mt-1 text-xs text-slate-500">
+                              {memberList.length} member(s)
+                           </p>
+                        </div>
 
-                     return (
-                        <li
-                           key={member.appUserId}
-                           className="px-4 py-3 hover:bg-(--prokress-beige-50) transition-colors duration-150"
-                        >
-                           <div className="flex items-center justify-between gap-3">
-                              <div className="flex min-w-0 items-center gap-3">
-                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--prokress-violet)/10 text-(--prokress-violet)">
-                                    {member.firstName?.[0] ?? "?"}
-                                    {member.lastName?.[0] ?? ""}
-                                 </div>
+                        <div className="flex-shrink-0">
+                           <button
+                              type="button"
+                              onClick={() => setAddMemberDialogOpen(true)}
+                              className="flex h-10 w-10 items-center justify-center rounded-full bg-(--prokress-violet)/10 text-(--prokress-violet) transition hover:bg-(--prokress-violet)/15"
+                              aria-label="Add member"
+                           >
+                              <svg
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 height="24px"
+                                 viewBox="0 -960 960 960"
+                                 width="24px"
+                                 fill="currentColor"
+                              >
+                                 <path d="M720-400v-120H600v-80h120v-120h80v120h120v80H800v120h-80ZM247-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm80-80h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q440-607 440-640t-23.5-56.5Q393-720 360-720t-56.5 23.5Q280-673 280-640t23.5 56.5Q327-560 360-560t56.5-23.5ZM360-640Zm0 400Z" />
+                              </svg>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                  <ul role="list" className="divide-y divide-slate-200/70">
+                     {memberList.map((member) =>  {
+                        const canDeleteMember =
+                           currUserRole === "owner" && member.role !== "owner";
+
+                        return (
+                           <li
+                              key={member.appUserId}
+                              className="px-4 py-3 hover:bg-(--prokress-beige-50) transition-colors duration-150"
+                           >
+                              <div className="flex items-center justify-between gap-3">
+                                 <div className="flex min-w-0 items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--prokress-violet)/10 text-(--prokress-violet)">
+                                       {member.firstName?.[0] ?? "?"}
+                                       {member.lastName?.[0] ?? ""}
+                                    </div>
 
                                  <div className="min-w-0">
                                     <p className="text-sm font-semibold text-(--prokress-black-700)">
@@ -546,14 +592,11 @@ return (
             taskListId={taskListId}
             contextMenuId={contextMenuId}
          />
-      )}
-      {contextMenuMode === "project" && projectId && (
-         <ContextMenu
-            isOpen={true}
-            mode="project"
-            toggleContextMenu={() => setContextMenuMode(null)}
-            positions={pos}
-            contextMenuId={contextMenuId}
+         <AddMemberDialog
+            isOpen={isAddMemberDialogOpen}
+            projectId={projectId}
+            toggleDialog={() => setAddMemberDialogOpen(false)}
+            onMemberAdded={refreshMembers}
          />
       )}
 

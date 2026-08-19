@@ -416,9 +416,9 @@ export async function reorderTaskOrder(
 }
 
 //Search users by username
-export async function searchUsers(query: string): Promise<AppUserSummary[]> {
+export async function searchUsers(keyword: string): Promise<AppUserSummary[]> {
    const token = localStorage.getItem("token");
-   const response = await fetch(`${url}/api/users/search?query=${encodeURIComponent(query)}`, {
+   const response = await fetch(`${url}/api/users/search/${keyword}`, {
       headers: {
          "Content-Type": "application/json",
          Authorization: `Bearer ${token}`,
