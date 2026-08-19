@@ -20,6 +20,8 @@ const AddMemberDialog: React.FC<Props> = ({ isOpen, projectId, toggleDialog, onM
     // const [form, setForm] = useState<ProjectPayload>({ name: "", description: "" })
     const [username, setUsername] = useState<string>("")
     const [searchResults, setSearchResults] = useState<AppUserSummary[]>([])
+    const [noUsersFound, setNoUsersFound] = useState<boolean>(false);
+
     if (!isOpen) return null
 
     const handleSearch = async (e: SubmitEvent) => {
@@ -28,7 +30,7 @@ const AddMemberDialog: React.FC<Props> = ({ isOpen, projectId, toggleDialog, onM
             const results = await searchUsers(username.trim())
             setSearchResults(results)
             if (results.length === 0) {
-                alert("No users found");
+                setNoUsersFound(true);
             }
         } catch (err) {
             console.error('Search failed', err)
